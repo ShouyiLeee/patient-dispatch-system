@@ -40,7 +40,7 @@ Input → Triage Agent → Patient Care Agent → Final Routing
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/YOUR_USERNAME/patient-dispatch-system.git
+git clone https://github.com/ShouyiLeee/patient-dispatch-system.git
 cd patient-dispatch-system
 ```
 
