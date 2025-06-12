@@ -1,0 +1,66 @@
+{
+  "common_questions": [
+    {
+      "question": "Tôi nên dùng thuốc gì?",
+      "answer": "Tôi không thể kê đơn thuốc cụ thể. Để có lời khuyên về thuốc phù hợp, bạn nên tham khảo ý kiến của bác sĩ hoặc dược sĩ. Họ sẽ xem xét tình trạng sức khỏe, tiền sử bệnh lý và các loại thuốc bạn đang sử dụng để đưa ra lời khuyên phù hợp."
+    },
+    {
+      "question": "Khi nào tôi nên đến bệnh viện?",
+      "answer": "Bạn nên đến bệnh viện ngay lập tức nếu có các dấu hiệu nguy hiểm như: khó thở, đau ngực dữ dội, mất ý thức, chảy máu không kiểm soát được, đau đầu dữ dội, sốt cao không giảm, hoặc các triệu chứng khác làm bạn lo lắng. Nếu tình trạng của bạn không quá khẩn cấp, bạn có thể đặt lịch khám tại phòng khám."
+    },
+    {
+      "question": "Triệu chứng này có nguy hiểm không?",
+      "answer": "Mức độ nguy hiểm phụ thuộc vào nhiều yếu tố như cường độ, thời gian kéo dài và các triệu chứng kèm theo. Dựa trên thông tin ban đầu, tình trạng của bạn không được đánh giá là khẩn cấp, nhưng điều quan trọng là theo dõi các thay đổi và tìm kiếm chăm sóc y tế nếu các triệu chứng trở nên nghiêm trọng hơn."
+    },
+    {
+      "question": "Cần làm gì để giảm đau?",
+      "answer": "Để giảm đau, bạn có thể thử các biện pháp sau: nghỉ ngơi, chườm đá (với chấn thương mới) hoặc chườm nóng (với đau mãn tính), thực hiện các kỹ thuật thư giãn như hít thở sâu. Thuốc giảm đau không kê đơn như paracetamol có thể giúp giảm đau nhẹ đến trung bình, nhưng hãy đọc kỹ hướng dẫn sử dụng và không vượt quá liều lượng khuyến cáo."
+    },
+    {
+      "question": "Tôi nên làm gì với cơn sốt?",
+      "answer": "Đối với sốt nhẹ, hãy đảm bảo nghỉ ngơi và uống nhiều nước. Thuốc hạ sốt như paracetamol có thể giúp giảm nhiệt độ và cảm giác khó chịu. Tránh mặc quần áo quá dày hoặc đắp chăn quá nhiều. Nếu sốt trên 39°C, kéo dài trên 3 ngày, hoặc kèm theo các triệu chứng nghiêm trọng khác, bạn nên đi khám bác sĩ."
+    },
+    {
+      "question": "Tôi có cần xét nghiệm không?",
+      "answer": "Việc có cần xét nghiệm hay không phụ thuộc vào các triệu chứng cụ thể của bạn, tiền sử bệnh lý và kết quả khám lâm sàng. Dựa trên thông tin ban đầu, tình trạng của bạn có thể không yêu cầu xét nghiệm khẩn cấp, nhưng bác sĩ sẽ đánh giá và quyết định chính xác nhất khi khám trực tiếp."
+    },
+    {
+      "question": "Triệu chứng này sẽ kéo dài bao lâu?",
+      "answer": "Thời gian kéo dài của triệu chứng phụ thuộc vào nguyên nhân cụ thể, tình trạng sức khỏe tổng thể và cách điều trị. Nhiều triệu chứng thông thường có thể tự khỏi trong vài ngày đến một tuần. Tuy nhiên, nếu triệu chứng kéo dài hoặc trở nên nghiêm trọng hơn, bạn nên tham khảo ý kiến bác sĩ."
+    },
+    {
+      "question": "Tôi có thể tập thể dục không?",
+      "answer": "Việc tập thể dục phụ thuộc vào tình trạng sức khỏe và các triệu chứng cụ thể. Nếu bạn đang bị sốt, mệt mỏi nhiều, hoặc đau nhức cơ thể, nên nghỉ ngơi đến khi các triệu chứng thuyên giảm. Với các tình trạng nhẹ, hoạt động thể chất nhẹ nhàng như đi bộ có thể có lợi. Hãy lắng nghe cơ thể và dừng lại nếu thấy không khỏe."
+    },
+    {
+      "question": "Tôi có thể ăn gì?",
+      "answer": "Khi bị ốm, hãy tập trung vào thực phẩm dễ tiêu hóa như cháo, súp, trái cây. Uống nhiều nước để tránh mất nước. Tránh thực phẩm cay nóng, nhiều dầu mỡ, thức ăn nhanh và đồ uống có cồn. Các thực phẩm giàu vitamin C và chất chống oxy hóa như cam, chanh, ổi, đu đủ có thể giúp tăng cường hệ miễn dịch."
+    },
+    {
+      "question": "Tôi nên nghỉ làm bao lâu?",
+      "answer": "Thời gian nghỉ làm phụ thuộc vào mức độ nghiêm trọng của triệu chứng và loại công việc bạn đang làm. Nếu bạn có các triệu chứng như sốt, ho, đau đầu dữ dội hoặc mệt mỏi nhiều, nên nghỉ ngơi ít nhất cho đến khi các triệu chứng thuyên giảm. Điều này không chỉ giúp bạn hồi phục nhanh hơn mà còn tránh lây bệnh cho đồng nghiệp."
+    }
+  ],
+  "emergency_questions": [
+    {
+      "question": "Tôi khó thở",
+      "answer": "Khó thở là dấu hiệu nghiêm trọng cần được xử lý ngay lập tức. Vui lòng gọi cấp cứu (115) hoặc đến phòng cấp cứu gần nhất. Trong khi chờ đợi, hãy ngồi thẳng lưng, thở chậm và sâu nếu có thể, và tránh hoạt động gắng sức."
+    },
+    {
+      "question": "Tôi đau ngực dữ dội",
+      "answer": "Đau ngực dữ dội có thể là dấu hiệu của vấn đề tim mạch nghiêm trọng như cơn đau thắt ngực hoặc nhồi máu cơ tim. Hãy gọi cấp cứu (115) ngay lập tức và không tự lái xe đến bệnh viện. Trong khi chờ đợi, hãy nghỉ ngơi và nếu được khuyên dùng, có thể uống aspirin nếu bạn không bị dị ứng."
+    },
+    {
+      "question": "Tôi bị chảy máu nhiều",
+      "answer": "Hãy ấn mạnh vào vết thương bằng khăn sạch hoặc băng gạc trong ít nhất 15 phút. Nâng vùng bị thương cao hơn mức tim nếu có thể. Nếu máu ngấm qua băng gạc, đừng gỡ ra mà hãy đặt thêm băng gạc lên trên. Gọi cấp cứu (115) hoặc đến phòng cấp cứu ngay lập tức nếu máu không ngừng chảy."
+    },
+    {
+      "question": "Tôi bị sốt rất cao",
+      "answer": "Sốt cao (trên 39.5°C) kèm theo các triệu chứng như cứng cổ, phát ban, khó thở, hoặc lú lẫn là dấu hiệu nghiêm trọng. Hãy đi khám bác sĩ ngay hoặc đến phòng cấp cứu. Trong khi chờ đợi, có thể uống thuốc hạ sốt như paracetamol theo hướng dẫn, uống nhiều nước và dùng khăn ấm để lau mát cơ thể."
+    },
+    {
+      "question": "Tôi đau đầu dữ dội",
+      "answer": "Đau đầu dữ dội đột ngột, đặc biệt khi kèm theo các triệu chứng như buồn nôn, nôn, cứng cổ, sợ ánh sáng, lú lẫn hoặc mất ý thức có thể là dấu hiệu của các vấn đề nghiêm trọng như xuất huyết não hoặc viêm màng não. Hãy gọi cấp cứu (115) hoặc đến phòng cấp cứu ngay lập tức."
+    }
+  ]
+}

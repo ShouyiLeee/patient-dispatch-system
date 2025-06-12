@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Điều phối Bệnh nhân</title>    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.24.1/themes/prism.css">
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1.24.1/prism.js"></script>
+</head>
+<body>
+    <div class="container-fluid">        <div class="row bg-primary text-white p-3">
+            <div class="col">
+                <h2>Hệ Thống Điều Phối Bệnh Nhân</h2>
+                <p>Phối hợp đa agent sử dụng LangGraph</p>
+            </div>
+            <div class="col-auto">
+                <div class="mt-2">
+                    <a href="/chatbot" class="btn btn-light me-2">
+                        <i class="bi bi-chat-dots"></i> Tư vấn trực tuyến
+                    </a>
+                    <a href="/" class="btn btn-outline-light">
+                        <i class="bi bi-plus-circle"></i> Thêm bệnh nhân mới
+                    </a>
+                </div>
+            </div>
+        </div>
+          <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="bi bi-diagram-3"></i> Luồng dữ liệu đa Agent & Visualization</h5>
+                        <div>
+                            <button class="btn btn-outline-light btn-sm me-2" onclick="switchVisualization('flow')">
+                                <i class="bi bi-diagram-2"></i> Flow Diagram
+                            </button>
+                            <button class="btn btn-outline-light btn-sm me-2" onclick="switchVisualization('langgraph')">
+                                <i class="bi bi-share"></i> LangGraph
+                            </button>
+                            <button class="btn btn-outline-light btn-sm" onclick="refreshFlowVisualization()">
+                                <i class="bi bi-arrow-clockwise"></i> Làm mới
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body" id="flow-visualization">
+                        <!-- Flow Diagram View -->
+                        <div id="flow-graph" style="width:100%; height:600px; background-color:#f8f9fa; border-radius:5px; position: relative;">
+                            <div class="text-center p-5">
+                                <div class="spinner-border" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <p>Đang tạo biểu đồ luồng dữ liệu...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- LangGraph View -->
+                        <div id="langgraph-view" style="width:100%; height:600px; background-color:#f8f9fa; border-radius:5px; position: relative; display: none;">
+                            <div class="p-4">
+                                <h6 class="mb-3">LangGraph Flow Visualization</h6>
+                                <div id="langgraph-content">
+                                    <!-- LangGraph visualization will be loaded here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Triage Results Section -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="card-title"><i class="bi bi-clipboard-pulse"></i> Kết quả phân loại (Triage)</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_flow and current_flow.get('data') and current_flow['data'].get('triage_result') %}
+                            {% set triage = current_flow['data']['triage_result'] %}
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <div class="mb-2">
+                                        <strong>Mức độ ưu tiên:</strong>
+                                        <span class="badge {% if triage.get('priority', 0) >= 4 %}bg-danger{% elif triage.get('priority', 0) >= 3 %}bg-warning{% else %}bg-success{% endif %} fs-6">
+                                            {{ triage.get('priority', 'N/A') }}/5
+                                        </span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Chuyên khoa:</strong>
+                                        <span class="text-info fw-bold">{{ triage.get('specialty', 'Chưa xác định') }}</span>
+                                    </div>
+                                    <div class="mb-2">
+                                        <strong>Cần cấp cứu:</strong>
+                                        <span class="badge {% if triage.get('needs_emergency') %}bg-danger{% else %}bg-success{% endif %}">
+                                            {% if triage.get('needs_emergency') %}Có{% else %}Không{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-md-9">
+                                    {% if triage.get('symptoms') %}
+                                    <div class="mb-3">
+                                        <strong>Triệu chứng được phát hiện:</strong>
+                                        <div class="mt-2">
+                                            {% for symptom in triage['symptoms'] %}
+                                                <div class="card mb-2 border-left-primary">
+                                                    <div class="card-body p-2">
+                                                        <div class="row">
+                                                            <div class="col-md-3">
+                                                                <strong>{{ symptom.get('name', 'N/A') }}</strong>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <small class="text-muted">
+                                                                    <i class="bi bi-geo-alt"></i> {{ symptom.get('location', 'N/A') }}
+                                                                </small>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <span class="badge {% if symptom.get('level') == 'Dữ dội' %}bg-danger{% elif symptom.get('level') == 'Trung bình' %}bg-warning{% else %}bg-info{% endif %}">
+                                                                    {{ symptom.get('level', 'N/A') }}
+                                                                </span>
+                                                            </div>
+                                                            <div class="col-md-3">
+                                                                <small class="text-muted">
+                                                                    <i class="bi bi-clock"></i> {{ symptom.get('duration', 'N/A') }}
+                                                                </small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if triage.get('vital_signs') %}
+                                    <div class="mb-2">
+                                        <strong>Chỉ số sinh tồn:</strong>
+                                        <div class="row mt-2">
+                                            {% set vitals = triage['vital_signs'] %}
+                                            <div class="col-md-3">
+                                                <small><strong>Huyết áp:</strong> {{ vitals.get('blood_pressure', 'N/A') }}</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small><strong>Nhịp tim:</strong> {{ vitals.get('heart_rate', 'N/A') }} bpm</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small><strong>SPO2:</strong> {{ vitals.get('spo2', 'N/A') }}%</small>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <small><strong>Nhiệt độ:</strong> {{ vitals.get('temperature', 'N/A') }}°C</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="bi bi-clipboard-pulse display-6"></i>
+                                <p class="mt-2">Chưa có kết quả phân loại</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kết quả điều phối -->
+        <div class="row mt-3">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title"><i class="bi bi-hospital"></i> Kết quả điều phối bệnh viện</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_flow and current_flow.get('data') and current_flow['data'].get('hospital_result') %}
+                            {% set hospital = current_flow['data']['hospital_result'] %}
+                            <div class="mb-2">
+                                <strong>Bệnh viện được chọn:</strong>
+                                <span class="text-success fw-bold">{{ hospital.get('recommended_hospital', 'Chưa xác định') }}</span>
+                            </div>
+                            {% if hospital.get('available_hospitals') %}
+                            <div class="mb-2">
+                                <strong>Danh sách bệnh viện khả dụng:</strong>
+                                <div class="mt-2">
+                                    {% for h in hospital['available_hospitals'] %}
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <span>{{ h.get('name', 'N/A') }}</span>
+                                            <div>
+                                                <span class="badge bg-info me-1">{{ h.get('distance', 'N/A') }}</span>
+                                                <span class="badge {% if h.get('capacity') == 'Available' %}bg-success{% else %}bg-warning{% endif %}">{{ h.get('capacity', 'N/A') }}</span>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="bi bi-hospital display-6"></i>
+                                <p class="mt-2">Chưa có kết quả điều phối bệnh viện</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-warning text-white">
+                        <h5 class="card-title"><i class="bi bi-gear"></i> Kết quả tối ưu hóa</h5>
+                    </div>
+                    <div class="card-body">
+                        {% if current_flow and current_flow.get('data') and current_flow['data'].get('optimizer_result') %}
+                            {% set optimizer = current_flow['data']['optimizer_result'] %}
+                            <div class="mb-2">
+                                <strong>Bệnh viện cuối cùng:</strong>
+                                <span class="text-warning fw-bold">{{ optimizer.get('selected_hospital', 'Chưa xác định') }}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Thời gian dự kiến:</strong>
+                                <span class="text-info">{{ optimizer.get('estimated_time', 'Chưa tính') }}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Xe cấp cứu:</strong>
+                                <span class="text-success">{{ optimizer.get('ambulance_assigned', 'Chưa phân công') }}</span>
+                            </div>
+                            <div class="mb-2">
+                                <strong>Tuyến đường:</strong>
+                                <span class="text-secondary">{{ optimizer.get('route_optimization', 'Chưa tối ưu') }}</span>
+                            </div>
+                            {% if optimizer.get('total_cost') %}
+                            <div class="mb-2">
+                                <strong>Chi phí ước tính:</strong>
+                                <span class="text-danger fw-bold">{{ optimizer.get('total_cost') }}</span>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted">
+                                <i class="bi bi-gear display-6"></i>
+                                <p class="mt-2">Chưa có kết quả tối ưu hóa</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+          <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card mb-4 bg-light">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title"><i class="bi bi-chat-dots-fill me-2"></i> Tính năng mới: Tư vấn trực tuyến</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center mb-3">
+                                <img src="{{ url_for('static', filename='images/favicon.svg') }}" alt="Chatbot icon" style="width: 100px; height: 100px;">
+                            </div>
+                            <div class="col-md-9">
+                                <h5>Tư vấn trực tuyến cho các trường hợp không khẩn cấp</h5>
+                                <p>Hệ thống mới của chúng tôi sẽ tự động đánh giá mức độ ưu tiên của bệnh nhân. Với các trường hợp có mức độ ưu tiên thấp (cấp độ 1-2), bệnh nhân sẽ được kết nối với trợ lý ảo thông minh để nhận tư vấn y tế trực tuyến.</p>
+                                <p>Trợ lý ảo có thể giúp:</p>
+                                <ul>
+                                    <li>Cung cấp thông tin y tế cơ bản</li>
+                                    <li>Hướng dẫn biện pháp chăm sóc tại nhà</li>
+                                    <li>Tư vấn khi nào cần gặp bác sĩ</li>
+                                    <li>Giải đáp các câu hỏi y tế thông thường</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3 mb-5">
+            <div class="col-md-12">                <div class="card">
+                    <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0"><i class="bi bi-clock-history"></i> Lịch sử điều phối</h5>
+                        <div>
+                            <a href="/" class="btn btn-light btn-sm me-2">
+                                <i class="bi bi-plus-circle"></i> Thêm bệnh nhân mới
+                            </a>
+                            <button id="run-demo" class="btn btn-warning btn-sm">
+                                <i class="bi bi-play-circle"></i> Chạy Demo
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        {% if flow_history %}
+                            <div class="table-responsive">
+                                <table class="table table-striped table-hover">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>ID Flow</th>
+                                            <th>Thời gian</th>
+                                            <th>Số Nodes</th>
+                                            <th>Số Edges</th>
+                                            <th>Trạng thái</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for flow in flow_history[:10] %}
+                                        <tr>
+                                            <td>
+                                                <code class="small">{{ flow.id[:16] }}...</code>
+                                            </td>
+                                            <td>
+                                                <small>{{ flow.timestamp }}</small>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-primary">{{ flow.nodes }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-info">{{ flow.edges }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-success">Hoàn thành</span>
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary view-flow" data-flow-id="{{ flow.id }}">
+                                                    <i class="bi bi-eye"></i> Xem
+                                                </button>
+                                                <a href="/report/{{ flow.id }}" class="btn btn-sm btn-outline-info">
+                                                    <i class="bi bi-file-text"></i> Báo cáo
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            {% if flow_history|length > 10 %}
+                            <div class="text-center mt-3">
+                                <button class="btn btn-outline-secondary" onclick="loadMoreHistory()">
+                                    <i class="bi bi-arrow-down-circle"></i> Xem thêm
+                                </button>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-inbox display-4"></i>
+                                <h5 class="mt-3">Chưa có lịch sử điều phối</h5>
+                                <p>Bắt đầu bằng cách thêm bệnh nhân mới hoặc chạy demo</p>
+                                <div class="mt-4">
+                                    <a href="/" class="btn btn-primary me-2">
+                                        <i class="bi bi-plus-circle"></i> Thêm bệnh nhân mới
+                                    </a>
+                                    <button id="demo-btn" class="btn btn-outline-primary">
+                                        <i class="bi bi-play-circle"></i> Chạy Demo
+                                    </button>
+                                </div>
+                            </div>                        {% endif %}
+                    </div>
+                </div>
+            </div>        </div>
+
+        <!-- Modal for detailed flow info -->
+    <div class="modal fade" id="flowDetailModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Chi tiết luồng dữ liệu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="flow-detail-content">
+                    <!-- Flow detail will be shown here -->
+                </div>
+            </div>
+        </div>
+    </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/flow-visualization.js') }}"></script>
+    <script>
+        // View flow details
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('view-flow') || e.target.closest('.view-flow')) {
+                const button = e.target.classList.contains('view-flow') ? e.target : e.target.closest('.view-flow');
+                const flowId = button.getAttribute('data-flow-id');
+                viewFlowDetails(flowId);
+            }
+        });
+
+        async function viewFlowDetails(flowId) {
+            try {
+                const response = await fetch(`/api/flows/${flowId}`);
+                const data = await response.json();
+                
+                if (data.error) {
+                    alert('Không thể tải thông tin flow: ' + data.error);
+                    return;
+                }
+                
+                // Create modal to show flow details
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Chi tiết Flow: ${flowId.substring(0, 16)}...</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <pre class="bg-light p-3 rounded"><code>${JSON.stringify(data.data, null, 2)}</code></pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                                <a href="/report/${flowId}" class="btn btn-primary">Xem báo cáo</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                document.body.appendChild(modal);
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+                
+                // Remove modal after hiding
+                modal.addEventListener('hidden.bs.modal', () => {
+                    modal.remove();
+                });
+                
+            } catch (error) {
+                console.error('Error loading flow details:', error);
+                alert('Có lỗi xảy ra khi tải thông tin flow');
+            }
+        }
+
+        function loadMoreHistory() {
+            // This could be implemented to load more history via AJAX
+            alert('Chức năng này sẽ được phát triển trong phiên bản tiếp theo');
+        }
+
+        // Demo button handlers
+        document.getElementById('run-demo')?.addEventListener('click', async function() {
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Đang chạy...';
+            
+            try {
+                const response = await fetch('/api/run-demo', { method: 'POST' });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Demo đã được khởi chạy thành công!');
+                    // Reload page after 3 seconds
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                } else {
+                    alert('Có lỗi xảy ra: ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error running demo:', error);
+                alert('Có lỗi xảy ra khi chạy demo');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = '<i class="bi bi-play-circle"></i> Chạy Demo';
+            }
+        });
+
+        document.getElementById('demo-btn')?.addEventListener('click', function() {
+            document.getElementById('run-demo')?.click();
+        });
+
+        // Initialize flow visualization
+        async function loadCurrentFlow() {
+            try {
+                const response = await fetch('/api/flows/current');
+                const data = await response.json();
+                
+                if (data && data.data) {
+                    displayFlowVisualization(data.data);
+                } else {
+                    document.getElementById('flow-graph').innerHTML = `
+                        <div class="text-center p-5 text-muted">
+                            <i class="bi bi-diagram-3 display-4"></i>
+                            <p class="mt-3">Chưa có flow nào được tạo</p>
+                            <a href="/" class="btn btn-primary">Bắt đầu với bệnh nhân mới</a>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading current flow:', error);
+                document.getElementById('flow-graph').innerHTML = `
+                    <div class="text-center p-5 text-danger">
+                        <i class="bi bi-exclamation-triangle display-4"></i>
+                        <p class="mt-3">Có lỗi xảy ra khi tải flow</p>
+                    </div>
+                `;
+            }
+        }        function displayFlowVisualization(flowData) {
+            const flowGraph = document.getElementById('flow-graph');
+            if (!flowGraph) return;
+            
+            // Extract status from flow data
+            const triageStatus = flowData.triage_result ? 'success' : 'secondary';
+            const hospitalStatus = flowData.hospital_result ? 'success' : 'secondary';
+            const optimizerStatus = flowData.optimizer_result ? 'success' : 'secondary';
+            
+            // Enhanced flow visualization with input/output data
+            flowGraph.innerHTML = `
+                <div class="p-3">
+                    <h6 class="text-center mb-4">Flow ID: <code>${flowData.flow_id || 'N/A'}</code></h6>
+                    
+                    <!-- Flow Diagram -->
+                    <div style="position: relative; height: 450px;">
+                        <!-- Input Data -->
+                        <div style="position: absolute; top: 0; left: 20px; width: 200px;">
+                            <div class="card border-info">
+                                <div class="card-header bg-info text-white text-center py-2">
+                                    <small><i class="bi bi-arrow-down-circle"></i> INPUT</small>
+                                </div>
+                                <div class="card-body p-2 small">
+                                    <strong>Bệnh nhân:</strong> ${flowData.patient_data?.patient_id || 'N/A'}<br>
+                                    <strong>Khẩn cấp:</strong> ${flowData.patient_data?.is_emergency ? 'Có' : 'Không'}<br>
+                                    <strong>Mô tả:</strong> ${(flowData.patient_data?.description || '').substring(0, 50)}${(flowData.patient_data?.description || '').length > 50 ? '...' : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Agent 1: Triage -->
+                        <div style="position: absolute; top: 120px; left: 50px; width: 150px;">
+                            <div class="card border-${triageStatus}">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-person-plus display-6 text-${triageStatus}"></i>
+                                    <h6 class="mt-2">Triage Agent</h6>
+                                    <small class="text-muted">Phân loại</small>
+                                    ${flowData.triage_result ? `
+                                        <div class="mt-2">
+                                            <span class="badge ${flowData.triage_result.priority >= 4 ? 'bg-danger' : flowData.triage_result.priority >= 3 ? 'bg-warning' : 'bg-success'}">
+                                                Ưu tiên: ${flowData.triage_result.priority}/5
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Agent 2: Hospital -->
+                        <div style="position: absolute; top: 120px; left: 250px; width: 150px;">
+                            <div class="card border-${hospitalStatus}">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-hospital display-6 text-${hospitalStatus}"></i>
+                                    <h6 class="mt-2">Hospital Agent</h6>
+                                    <small class="text-muted">Tìm bệnh viện</small>
+                                    ${flowData.hospital_result ? `
+                                        <div class="mt-2">
+                                            <span class="badge bg-info">
+                                                ${flowData.hospital_result.available_hospitals ? flowData.hospital_result.available_hospitals.length : 0} BV
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Agent 3: Optimizer -->
+                        <div style="position: absolute; top: 120px; left: 450px; width: 150px;">
+                            <div class="card border-${optimizerStatus}">
+                                <div class="card-body text-center p-3">
+                                    <i class="bi bi-truck display-6 text-${optimizerStatus}"></i>
+                                    <h6 class="mt-2">Optimizer Agent</h6>
+                                    <small class="text-muted">Tối ưu hóa</small>
+                                    ${flowData.optimizer_result ? `
+                                        <div class="mt-2">
+                                            <span class="badge bg-success">
+                                                ${flowData.optimizer_result.estimated_time || 'N/A'}
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Output Data -->
+                        <div style="position: absolute; top: 290px; right: 20px; width: 200px;">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white text-center py-2">
+                                    <small><i class="bi bi-arrow-up-circle"></i> OUTPUT</small>
+                                </div>
+                                <div class="card-body p-2 small">
+                                    <strong>Bệnh viện:</strong> ${flowData.optimizer_result?.selected_hospital || 'N/A'}<br>
+                                    <strong>Thời gian:</strong> ${flowData.optimizer_result?.estimated_time || 'N/A'}<br>
+                                    <strong>Xe cứu thương:</strong> ${flowData.optimizer_result?.ambulance_assigned || (flowData.optimizer_result?.transport_type === 'non_emergency' ? 'Không phân công' : 'N/A')}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Flow Arrows -->
+                        <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;">
+                            <!-- Input to Triage -->
+                            <path d="M 120 90 Q 125 110 125 130" fill="none" stroke="#007bff" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Triage to Hospital -->
+                            <path d="M 200 195 Q 225 195 250 195" fill="none" stroke="#28a745" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Hospital to Optimizer -->
+                            <path d="M 400 195 Q 425 195 450 195" fill="none" stroke="#ffc107" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Optimizer to Output -->
+                            <path d="M 525 270 Q 550 280 580 290" fill="none" stroke="#dc3545" stroke-width="2" marker-end="url(#arrowhead)"/>
+                            
+                            <!-- Arrow marker definition -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" fill="#666"/>
+                                </marker>
+                            </defs>
+                        </svg>
+                    </div>
+                    
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Hoàn thành lúc: ${flowData.timestamp ? new Date(flowData.timestamp).toLocaleString('vi-VN') : 'N/A'}
+                        </small>
+                    </div>
+                    ${flowData.status === 'completed' ? `
+                        <div class="text-center mt-2">
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Hoàn thành
+                            </span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }        function refreshFlowVisualization() {
+            loadCurrentFlow();
+        }
+
+        // Switch between different visualization views
+        function switchVisualization(type) {
+            const flowGraph = document.getElementById('flow-graph');
+            const langgraphView = document.getElementById('langgraph-view');
+            
+            if (type === 'flow') {
+                flowGraph.style.display = 'block';
+                langgraphView.style.display = 'none';
+                loadCurrentFlow();
+            } else if (type === 'langgraph') {
+                flowGraph.style.display = 'none';
+                langgraphView.style.display = 'block';
+                loadLangGraphVisualization();
+            }
+        }
+
+        // Load LangGraph visualization
+        async function loadLangGraphVisualization() {
+            const langgraphContent = document.getElementById('langgraph-content');
+            
+            try {
+                const response = await fetch('/api/flows/current');
+                const data = await response.json();
+                
+                if (data && data.data) {
+                    displayLangGraphFlow(data.data);
+                } else {
+                    langgraphContent.innerHTML = `
+                        <div class="text-center p-5 text-muted">
+                            <i class="bi bi-diagram-3 display-4"></i>
+                            <p class="mt-3">Chưa có flow nào để hiển thị LangGraph</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading LangGraph visualization:', error);
+                langgraphContent.innerHTML = `
+                    <div class="text-center p-5 text-danger">
+                        <i class="bi bi-exclamation-triangle display-4"></i>
+                        <p class="mt-3">Có lỗi xảy ra khi tải LangGraph</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Display LangGraph-style flow visualization
+        function displayLangGraphFlow(flowData) {
+            const langgraphContent = document.getElementById('langgraph-content');
+            if (!langgraphContent) return;
+
+            // Create LangGraph-style visualization
+            langgraphContent.innerHTML = `
+                <div style="position: relative; height: 500px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 8px;">
+                    <!-- Start Node -->
+                    <div style="position: absolute; top: 20px; left: 50%; transform: translateX(-50%); width: 120px;">
+                        <div class="card border-success shadow-sm">
+                            <div class="card-body text-center p-2">
+                                <i class="bi bi-play-circle text-success"></i>
+                                <div class="small fw-bold">START</div>
+                                <div class="small text-muted">Patient Input</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Triage Node -->
+                    <div style="position: absolute; top: 120px; left: 20%; width: 150px;">
+                        <div class="card border-primary shadow-sm">
+                            <div class="card-header bg-primary text-white text-center py-1">
+                                <small>Triage Agent</small>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="small">
+                                    <strong>Input:</strong> Symptoms<br>
+                                    <strong>Output:</strong> Priority ${flowData.triage_result?.priority || 'N/A'}<br>
+                                    <strong>Specialty:</strong> ${flowData.triage_result?.specialty || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hospital Node -->
+                    <div style="position: absolute; top: 120px; left: 50%; transform: translateX(-50%); width: 150px;">
+                        <div class="card border-success shadow-sm">
+                            <div class="card-header bg-success text-white text-center py-1">
+                                <small>Hospital Agent</small>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="small">
+                                    <strong>Input:</strong> Location<br>
+                                    <strong>Output:</strong> ${flowData.hospital_result?.available_hospitals?.length || 0} hospitals<br>
+                                    <strong>Selected:</strong> ${flowData.hospital_result?.recommended_hospital || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Optimizer Node -->
+                    <div style="position: absolute; top: 120px; right: 20%; width: 150px;">
+                        <div class="card border-warning shadow-sm">
+                            <div class="card-header bg-warning text-white text-center py-1">
+                                <small>Optimizer Agent</small>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="small">
+                                    <strong>Input:</strong> Hospital + Priority<br>
+                                    <strong>Output:</strong> Route<br>
+                                    <strong>Time:</strong> ${flowData.optimizer_result?.estimated_time || 'N/A'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- End Node -->
+                    <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); width: 120px;">
+                        <div class="card border-danger shadow-sm">
+                            <div class="card-body text-center p-2">
+                                <i class="bi bi-flag text-danger"></i>
+                                <div class="small fw-bold">END</div>
+                                <div class="small text-muted">Final Result</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Conditional Node -->
+                    <div style="position: absolute; top: 280px; left: 50%; transform: translateX(-50%); width: 140px;">
+                        <div class="card border-info shadow-sm">
+                            <div class="card-body text-center p-2">
+                                <i class="bi bi-question-circle text-info"></i>
+                                <div class="small fw-bold">CONDITION</div>
+                                <div class="small text-muted">Emergency?</div>
+                                <div class="small mt-1">
+                                    <span class="badge ${flowData.triage_result?.needs_emergency ? 'bg-danger' : 'bg-success'}">
+                                        ${flowData.triage_result?.needs_emergency ? 'YES' : 'NO'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Arrows -->
+                    <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;">
+                        <!-- Start to Triage -->
+                        <path d="M 50% 90 Q 30% 110 25% 130" fill="none" stroke="#007bff" stroke-width="3" marker-end="url(#arrow)"/>
+                        
+                        <!-- Triage to Hospital -->
+                        <path d="M 35% 195 Q 45% 195 50% 195" fill="none" stroke="#28a745" stroke-width="3" marker-end="url(#arrow)"/>
+                        
+                        <!-- Hospital to Optimizer -->
+                        <path d="M 58% 195 Q 68% 195 75% 195" fill="none" stroke="#ffc107" stroke-width="3" marker-end="url(#arrow)"/>
+                        
+                        <!-- All to Condition -->
+                        <path d="M 50% 270 Q 50% 280 50% 290" fill="none" stroke="#17a2b8" stroke-width="3" marker-end="url(#arrow)"/>
+                        
+                        <!-- Condition to End -->
+                        <path d="M 50% 360 Q 50% 390 50% 420" fill="none" stroke="#dc3545" stroke-width="3" marker-end="url(#arrow)"/>
+
+                        <defs>
+                            <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                                <path d="M0,0 L0,6 L9,3 z" fill="#666"/>
+                            </marker>
+                        </defs>
+                    </svg>
+
+                    <!-- Flow Info -->
+                    <div style="position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); padding: 10px; border-radius: 5px; border: 1px solid #ddd;">
+                        <div class="small">
+                            <strong>Flow ID:</strong> ${flowData.flow_id?.substring(0, 8) || 'N/A'}...<br>
+                            <strong>Status:</strong> <span class="badge bg-success">${flowData.status || 'unknown'}</span><br>
+                            <strong>Type:</strong> LangGraph Workflow
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+                                        <div class="mt-2">
+                                            <span class="badge bg-${flowData.triage_result.priority >= 4 ? 'danger' : flowData.triage_result.priority >= 3 ? 'warning' : 'success'}">
+                                                Ưu tiên: ${flowData.triage_result.priority}/5
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-${hospitalStatus}">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-hospital display-6 text-${hospitalStatus}"></i>
+                                    <h6 class="mt-2">Hospital Agent</h6>
+                                    <small class="text-muted">Tìm bệnh viện</small>
+                                    ${flowData.hospital_result ? `
+                                        <div class="mt-2">
+                                            <span class="badge bg-info">
+                                                ${flowData.hospital_result.available_hospitals ? flowData.hospital_result.available_hospitals.length : 0} bệnh viện
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-${optimizerStatus}">
+                                <div class="card-body text-center">
+                                    <i class="bi bi-truck display-6 text-${optimizerStatus}"></i>
+                                    <h6 class="mt-2">Optimizer Agent</h6>
+                                    <small class="text-muted">Tối ưu điều phối</small>
+                                    ${flowData.optimizer_result ? `
+                                        <div class="mt-2">
+                                            <span class="badge bg-success">
+                                                ${flowData.optimizer_result.estimated_time || 'N/A'}
+                                            </span>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <small class="text-muted">
+                            Hoàn thành lúc: ${flowData.timestamp ? new Date(flowData.timestamp).toLocaleString('vi-VN') : 'N/A'}
+                        </small>
+                    </div>
+                    ${flowData.status === 'completed' ? `
+                        <div class="text-center mt-2">
+                            <span class="badge bg-success">
+                                <i class="bi bi-check-circle"></i> Hoàn thành
+                            </span>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Load flow visualization on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentFlow();
+        });
+    </script>
+</body>
+</html>

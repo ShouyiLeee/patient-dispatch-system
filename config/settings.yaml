@@ -1,0 +1,29 @@
+api:
+  gemini_api_key: "AIzaSyA-kIWVKcPvSyzs_bb1MWNWYJJIstKs4_U"
+  openai_api_key: "AIzaSyA-kIWVKcPvSyzs_bb1MWNWYJJIstKs4_U"
+  openai_base_url: "https://generativelanguage.googleapis.com/v1beta"
+  
+system:
+  debug: true
+  log_level: "INFO"
+  
+triage:
+  priority_threshold: 3  # 1-5 scale where 5 is most severe
+  emergency_threshold: 4
+  default_specialty: "general medicine"
+  symptom_confidence_threshold: 0.7
+
+hospitals:
+  matching_radius_km: 25
+  max_suggestions: 5
+  max_wait_time_minutes: 120
+
+dispatch:
+  max_ambulance_search_radius_km: 15
+  max_suggestions: 3
+  max_response_time_minutes: 30
+
+optimization:
+  traffic_update_interval_minutes: 15
+  hospital_load_update_interval_minutes: 30
+  route_recalculation_threshold_minutes: 10

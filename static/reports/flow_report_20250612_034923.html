@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Flow Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { background-color: #0d6efd; color: white; padding: 15px; text-align: center; }
+        .node { border: 1px solid #ccc; margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .node-title { background-color: #f0f0f0; padding: 5px; margin: -15px -15px 15px; border-radius: 5px 5px 0 0; }
+        .edge { margin: 10px 0; padding: 10px; background-color: #f9f9f9; border-left: 4px solid #0d6efd; }
+        .data-section { display: flex; }
+        .data-column { flex: 1; padding: 10px; }
+        pre { background-color: #f5f5f5; padding: 10px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Patient Flow Coordination Report</h1>
+            <p>Generated on: 2025-06-12 03:49:23</p>
+        </div>
+        
+        <h2>Flow Sequence</h2>
+        <ol>
+            <li>TriageAgent</li>
+            <li>HospitalAgent</li>
+            <li>DispatchAgent</li>
+            <li>OptimizerAgent</li>
+        </ol>
+        
+        <h2>Nodes</h2>
+
+        <div class="node">
+            <div class="node-title">
+                <h3>TriageAgent</h3>
+                <p>Timestamp: 2025-06-12 03:49:23</p>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-column">
+                    <h4>Input Data</h4>
+                    <pre>{
+  "patient_id": "P12345",
+  "description": "Nam, 55 tu\u1ed5i, b\u1ea5t t\u1ec9nh trong c\u00f4ng vi\u00ean, da t\u00e1i, m\u1ed3 h\u00f4i l\u1ea1nh, kh\u00f4ng ph\u1ea3n \u1ee9ng.",
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "vitals": "Huy\u1ebft \u00e1p: Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c, Nh\u1ecbp tim: Kh\u00f4ng x\u00e1c \u0111\u1ecbnh",
+  "onset_time": "10 ph\u00fat",
+  "medical_history": "T\u0103ng huy\u1ebft \u00e1p, \u0111\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+}</pre>
+                </div>
+                <div class="data-column">
+                    <h4>Output Data</h4>
+                    <pre>{
+  "symptoms": [
+    {
+      "name": "B\u1ea5t t\u1ec9nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "C\u00f4ng vi\u00ean"
+    },
+    {
+      "name": "Da t\u00e1i",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "M\u1ed3 h\u00f4i l\u1ea1nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "Kh\u00f4ng ph\u1ea3n \u1ee9ng",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    }
+  ],
+  "priority": 1,
+  "specialty": "C\u1ea5p c\u1ee9u",
+  "needs_emergency": true,
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "patient_info": {
+    "age": 55,
+    "gender": "Nam",
+    "medical_history": [
+      "T\u0103ng huy\u1ebft \u00e1p",
+      "\u0110\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+    ]
+  },
+  "vital_signs": {
+    "blood_pressure": "Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c",
+    "heart_rate": "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh"
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="node">
+            <div class="node-title">
+                <h3>HospitalAgent</h3>
+                <p>Timestamp: 2025-06-12 03:49:23</p>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-column">
+                    <h4>Input Data</h4>
+                    <pre>{
+  "symptoms": [
+    {
+      "name": "B\u1ea5t t\u1ec9nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "C\u00f4ng vi\u00ean"
+    },
+    {
+      "name": "Da t\u00e1i",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "M\u1ed3 h\u00f4i l\u1ea1nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "Kh\u00f4ng ph\u1ea3n \u1ee9ng",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    }
+  ],
+  "priority": 1,
+  "specialty": "C\u1ea5p c\u1ee9u",
+  "needs_emergency": true,
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "patient_info": {
+    "age": 55,
+    "gender": "Nam",
+    "medical_history": [
+      "T\u0103ng huy\u1ebft \u00e1p",
+      "\u0110\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+    ]
+  },
+  "vital_signs": {
+    "blood_pressure": "Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c",
+    "heart_rate": "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh"
+  },
+  "patient_id": "P12345"
+}</pre>
+                </div>
+                <div class="data-column">
+                    <h4>Output Data</h4>
+                    <pre>{
+  "patient_id": "P12345",
+  "hospitals": [
+    {
+      "id": "H001",
+      "name": "B\u1ec7nh vi\u1ec7n Ch\u1ee3 R\u1eaby",
+      "address": "201B Nguy\u1ec5n Ch\u00ed Thanh, Q.5, TP.HCM",
+      "specialties": [
+        "C\u1ea5p c\u1ee9u",
+        "Tim m\u1ea1ch",
+        "ICU",
+        "N\u1ed9i t\u1ed5ng qu\u00e1t"
+      ],
+      "wait_time_minutes": 25,
+      "available_beds": 50,
+      "icu_beds": 10,
+      "estimated_distance_km": 1.0,
+      "score": 16,
+      "assigned_doctor": {
+        "id": "DR001",
+        "name": "BS. Nguy\u1ec5n V\u0103n A",
+        "status": "available"
+      },
+      "doctor_specialty": "C\u1ea5p c\u1ee9u"
+    },
+    {
+      "id": "H002",
+      "name": "B\u1ec7nh vi\u1ec7n Nhi \u0110\u1ed3ng 1",
+      "address": "341 S\u01b0 V\u1ea1n H\u1ea1nh, Q.10, TP.HCM",
+      "specialties": [
+        "Nhi khoa",
+        "C\u1ea5p c\u1ee9u",
+        "ICU"
+      ],
+      "wait_time_minutes": 40,
+      "available_beds": 30,
+      "icu_beds": 8,
+      "estimated_distance_km": 2.0,
+      "score": 15,
+      "assigned_doctor": {
+        "id": "DR011",
+        "name": "BS. L\u00fd V\u0103n K",
+        "status": "available"
+      },
+      "doctor_specialty": "C\u1ea5p c\u1ee9u"
+    }
+  ],
+  "is_emergency": true
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="node">
+            <div class="node-title">
+                <h3>DispatchAgent</h3>
+                <p>Timestamp: 2025-06-12 03:49:23</p>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-column">
+                    <h4>Input Data</h4>
+                    <pre>{
+  "symptoms": [
+    {
+      "name": "B\u1ea5t t\u1ec9nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "C\u00f4ng vi\u00ean"
+    },
+    {
+      "name": "Da t\u00e1i",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "M\u1ed3 h\u00f4i l\u1ea1nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "Kh\u00f4ng ph\u1ea3n \u1ee9ng",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    }
+  ],
+  "priority": 1,
+  "specialty": "C\u1ea5p c\u1ee9u",
+  "needs_emergency": true,
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "patient_info": {
+    "age": 55,
+    "gender": "Nam",
+    "medical_history": [
+      "T\u0103ng huy\u1ebft \u00e1p",
+      "\u0110\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+    ]
+  },
+  "vital_signs": {
+    "blood_pressure": "Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c",
+    "heart_rate": "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh"
+  },
+  "patient_id": "P12345"
+}</pre>
+                </div>
+                <div class="data-column">
+                    <h4>Output Data</h4>
+                    <pre>{
+  "patient_id": "P12345",
+  "ambulances": [
+    {
+      "id": "A001",
+      "name": "Xe c\u1ee9u th\u01b0\u01a1ng 1",
+      "equipment": [
+        "Monitor",
+        "Oxy",
+        "C\u1ea5p c\u1ee9u"
+      ],
+      "eta_minutes": 10,
+      "estimated_distance_km": 1.0,
+      "personnel": [
+        {
+          "id": "EMT001",
+          "name": "Nguy\u1ec5n Ho\u00e0ng An",
+          "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+        },
+        {
+          "id": "EMT002",
+          "name": "Tr\u1ea7n B\u00e1 C\u01b0\u1eddng",
+          "role": "L\u00e1i xe"
+        }
+      ],
+      "capacity": 2,
+      "score": 13.0
+    },
+    {
+      "id": "A002",
+      "name": "Xe c\u1ee9u th\u01b0\u01a1ng 2",
+      "equipment": [
+        "Monitor",
+        "Oxy"
+      ],
+      "eta_minutes": 15,
+      "estimated_distance_km": 2.0,
+      "personnel": [
+        {
+          "id": "EMT003",
+          "name": "L\u00ea Th\u1ecb Dung",
+          "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+        },
+        {
+          "id": "EMT004",
+          "name": "Ph\u1ea1m V\u0103n Em",
+          "role": "L\u00e1i xe"
+        }
+      ],
+      "capacity": 1,
+      "score": 9.333333333333332
+    }
+  ],
+  "is_emergency": true
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="node">
+            <div class="node-title">
+                <h3>OptimizerAgent</h3>
+                <p>Timestamp: 2025-06-12 03:49:23</p>
+            </div>
+            
+            <div class="data-section">
+                <div class="data-column">
+                    <h4>Input Data</h4>
+                    <pre>{
+  "hospital_data": {
+    "patient_id": "P12345",
+    "hospitals": [
+      {
+        "id": "H001",
+        "name": "B\u1ec7nh vi\u1ec7n Ch\u1ee3 R\u1eaby",
+        "address": "201B Nguy\u1ec5n Ch\u00ed Thanh, Q.5, TP.HCM",
+        "specialties": [
+          "C\u1ea5p c\u1ee9u",
+          "Tim m\u1ea1ch",
+          "ICU",
+          "N\u1ed9i t\u1ed5ng qu\u00e1t"
+        ],
+        "wait_time_minutes": 25,
+        "available_beds": 50,
+        "icu_beds": 10,
+        "estimated_distance_km": 1.0,
+        "score": 16,
+        "assigned_doctor": {
+          "id": "DR001",
+          "name": "BS. Nguy\u1ec5n V\u0103n A",
+          "status": "available"
+        },
+        "doctor_specialty": "C\u1ea5p c\u1ee9u"
+      },
+      {
+        "id": "H002",
+        "name": "B\u1ec7nh vi\u1ec7n Nhi \u0110\u1ed3ng 1",
+        "address": "341 S\u01b0 V\u1ea1n H\u1ea1nh, Q.10, TP.HCM",
+        "specialties": [
+          "Nhi khoa",
+          "C\u1ea5p c\u1ee9u",
+          "ICU"
+        ],
+        "wait_time_minutes": 40,
+        "available_beds": 30,
+        "icu_beds": 8,
+        "estimated_distance_km": 2.0,
+        "score": 15,
+        "assigned_doctor": {
+          "id": "DR011",
+          "name": "BS. L\u00fd V\u0103n K",
+          "status": "available"
+        },
+        "doctor_specialty": "C\u1ea5p c\u1ee9u"
+      }
+    ],
+    "is_emergency": true
+  },
+  "dispatch_data": {
+    "patient_id": "P12345",
+    "ambulances": [
+      {
+        "id": "A001",
+        "name": "Xe c\u1ee9u th\u01b0\u01a1ng 1",
+        "equipment": [
+          "Monitor",
+          "Oxy",
+          "C\u1ea5p c\u1ee9u"
+        ],
+        "eta_minutes": 10,
+        "estimated_distance_km": 1.0,
+        "personnel": [
+          {
+            "id": "EMT001",
+            "name": "Nguy\u1ec5n Ho\u00e0ng An",
+            "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+          },
+          {
+            "id": "EMT002",
+            "name": "Tr\u1ea7n B\u00e1 C\u01b0\u1eddng",
+            "role": "L\u00e1i xe"
+          }
+        ],
+        "capacity": 2,
+        "score": 13.0
+      },
+      {
+        "id": "A002",
+        "name": "Xe c\u1ee9u th\u01b0\u01a1ng 2",
+        "equipment": [
+          "Monitor",
+          "Oxy"
+        ],
+        "eta_minutes": 15,
+        "estimated_distance_km": 2.0,
+        "personnel": [
+          {
+            "id": "EMT003",
+            "name": "L\u00ea Th\u1ecb Dung",
+            "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+          },
+          {
+            "id": "EMT004",
+            "name": "Ph\u1ea1m V\u0103n Em",
+            "role": "L\u00e1i xe"
+          }
+        ],
+        "capacity": 1,
+        "score": 9.333333333333332
+      }
+    ],
+    "is_emergency": true
+  }
+}</pre>
+                </div>
+                <div class="data-column">
+                    <h4>Output Data</h4>
+                    <pre>{
+  "patient_id": "P12345",
+  "optimized_hospital": {
+    "id": "H001",
+    "name": "B\u1ec7nh vi\u1ec7n Ch\u1ee3 R\u1eaby",
+    "address": "201B Nguy\u1ec5n Ch\u00ed Thanh, Q.5, TP.HCM",
+    "specialties": [
+      "C\u1ea5p c\u1ee9u",
+      "Tim m\u1ea1ch",
+      "ICU",
+      "N\u1ed9i t\u1ed5ng qu\u00e1t"
+    ],
+    "wait_time_minutes": 25,
+    "available_beds": 50,
+    "icu_beds": 10,
+    "estimated_distance_km": 1.0,
+    "score": 16,
+    "assigned_doctor": {
+      "id": "DR001",
+      "name": "BS. Nguy\u1ec5n V\u0103n A",
+      "status": "available"
+    },
+    "doctor_specialty": "C\u1ea5p c\u1ee9u"
+  },
+  "optimized_ambulance": {
+    "id": "A001",
+    "name": "Xe c\u1ee9u th\u01b0\u01a1ng 1",
+    "equipment": [
+      "Monitor",
+      "Oxy",
+      "C\u1ea5p c\u1ee9u"
+    ],
+    "eta_minutes": 10,
+    "estimated_distance_km": 1.0,
+    "personnel": [
+      {
+        "id": "EMT001",
+        "name": "Nguy\u1ec5n Ho\u00e0ng An",
+        "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+      },
+      {
+        "id": "EMT002",
+        "name": "Tr\u1ea7n B\u00e1 C\u01b0\u1eddng",
+        "role": "L\u00e1i xe"
+      }
+    ],
+    "capacity": 2,
+    "score": 13.0
+  },
+  "eta_minutes": 10,
+  "estimated_arrival_time": "03:59"
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <h2>Edges</h2>
+
+        <div class="edge">
+            <h4>TriageAgent → HospitalAgent</h4>
+            <p>Timestamp: 2025-06-12 03:49:23</p>
+            <h5>Data:</h5>
+            <pre>{
+  "symptoms": [
+    {
+      "name": "B\u1ea5t t\u1ec9nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "C\u00f4ng vi\u00ean"
+    },
+    {
+      "name": "Da t\u00e1i",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "M\u1ed3 h\u00f4i l\u1ea1nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "Kh\u00f4ng ph\u1ea3n \u1ee9ng",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    }
+  ],
+  "priority": 1,
+  "specialty": "C\u1ea5p c\u1ee9u",
+  "needs_emergency": true,
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "patient_info": {
+    "age": 55,
+    "gender": "Nam",
+    "medical_history": [
+      "T\u0103ng huy\u1ebft \u00e1p",
+      "\u0110\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+    ]
+  },
+  "vital_signs": {
+    "blood_pressure": "Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c",
+    "heart_rate": "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh"
+  }
+}</pre>
+        </div>
+
+        <div class="edge">
+            <h4>TriageAgent → DispatchAgent</h4>
+            <p>Timestamp: 2025-06-12 03:49:23</p>
+            <h5>Data:</h5>
+            <pre>{
+  "symptoms": [
+    {
+      "name": "B\u1ea5t t\u1ec9nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "C\u00f4ng vi\u00ean"
+    },
+    {
+      "name": "Da t\u00e1i",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "M\u1ed3 h\u00f4i l\u1ea1nh",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    },
+    {
+      "name": "Kh\u00f4ng ph\u1ea3n \u1ee9ng",
+      "level": "Nghi\u00eam tr\u1ecdng",
+      "time": "10 ph\u00fat",
+      "location": "To\u00e0n th\u00e2n"
+    }
+  ],
+  "priority": 1,
+  "specialty": "C\u1ea5p c\u1ee9u",
+  "needs_emergency": true,
+  "location": {
+    "latitude": 10.754,
+    "longitude": 106.6631
+  },
+  "patient_info": {
+    "age": 55,
+    "gender": "Nam",
+    "medical_history": [
+      "T\u0103ng huy\u1ebft \u00e1p",
+      "\u0110\u00e1i th\u00e1o \u0111\u01b0\u1eddng"
+    ]
+  },
+  "vital_signs": {
+    "blood_pressure": "Kh\u00f4ng \u0111o \u0111\u01b0\u1ee3c",
+    "heart_rate": "Kh\u00f4ng x\u00e1c \u0111\u1ecbnh"
+  }
+}</pre>
+        </div>
+
+        <div class="edge">
+            <h4>HospitalAgent → OptimizerAgent</h4>
+            <p>Timestamp: 2025-06-12 03:49:23</p>
+            <h5>Data:</h5>
+            <pre>{
+  "patient_id": "P12345",
+  "hospitals": [
+    {
+      "id": "H001",
+      "name": "B\u1ec7nh vi\u1ec7n Ch\u1ee3 R\u1eaby",
+      "address": "201B Nguy\u1ec5n Ch\u00ed Thanh, Q.5, TP.HCM",
+      "specialties": [
+        "C\u1ea5p c\u1ee9u",
+        "Tim m\u1ea1ch",
+        "ICU",
+        "N\u1ed9i t\u1ed5ng qu\u00e1t"
+      ],
+      "wait_time_minutes": 25,
+      "available_beds": 50,
+      "icu_beds": 10,
+      "estimated_distance_km": 1.0,
+      "score": 16,
+      "assigned_doctor": {
+        "id": "DR001",
+        "name": "BS. Nguy\u1ec5n V\u0103n A",
+        "status": "available"
+      },
+      "doctor_specialty": "C\u1ea5p c\u1ee9u"
+    },
+    {
+      "id": "H002",
+      "name": "B\u1ec7nh vi\u1ec7n Nhi \u0110\u1ed3ng 1",
+      "address": "341 S\u01b0 V\u1ea1n H\u1ea1nh, Q.10, TP.HCM",
+      "specialties": [
+        "Nhi khoa",
+        "C\u1ea5p c\u1ee9u",
+        "ICU"
+      ],
+      "wait_time_minutes": 40,
+      "available_beds": 30,
+      "icu_beds": 8,
+      "estimated_distance_km": 2.0,
+      "score": 15,
+      "assigned_doctor": {
+        "id": "DR011",
+        "name": "BS. L\u00fd V\u0103n K",
+        "status": "available"
+      },
+      "doctor_specialty": "C\u1ea5p c\u1ee9u"
+    }
+  ],
+  "is_emergency": true
+}</pre>
+        </div>
+
+        <div class="edge">
+            <h4>DispatchAgent → OptimizerAgent</h4>
+            <p>Timestamp: 2025-06-12 03:49:23</p>
+            <h5>Data:</h5>
+            <pre>{
+  "patient_id": "P12345",
+  "ambulances": [
+    {
+      "id": "A001",
+      "name": "Xe c\u1ee9u th\u01b0\u01a1ng 1",
+      "equipment": [
+        "Monitor",
+        "Oxy",
+        "C\u1ea5p c\u1ee9u"
+      ],
+      "eta_minutes": 10,
+      "estimated_distance_km": 1.0,
+      "personnel": [
+        {
+          "id": "EMT001",
+          "name": "Nguy\u1ec5n Ho\u00e0ng An",
+          "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+        },
+        {
+          "id": "EMT002",
+          "name": "Tr\u1ea7n B\u00e1 C\u01b0\u1eddng",
+          "role": "L\u00e1i xe"
+        }
+      ],
+      "capacity": 2,
+      "score": 13.0
+    },
+    {
+      "id": "A002",
+      "name": "Xe c\u1ee9u th\u01b0\u01a1ng 2",
+      "equipment": [
+        "Monitor",
+        "Oxy"
+      ],
+      "eta_minutes": 15,
+      "estimated_distance_km": 2.0,
+      "personnel": [
+        {
+          "id": "EMT003",
+          "name": "L\u00ea Th\u1ecb Dung",
+          "role": "\u0110i\u1ec1u d\u01b0\u1ee1ng c\u1ea5p c\u1ee9u"
+        },
+        {
+          "id": "EMT004",
+          "name": "Ph\u1ea1m V\u0103n Em",
+          "role": "L\u00e1i xe"
+        }
+      ],
+      "capacity": 1,
+      "score": 9.333333333333332
+    }
+  ],
+  "is_emergency": true
+}</pre>
+        </div>
+
+    </div>
+</body>
+</html>

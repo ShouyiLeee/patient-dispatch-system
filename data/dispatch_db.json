@@ -1,0 +1,41 @@
+[
+  {
+    "id": "A001",
+    "name": "Xe cứu thương 1",
+    "location": {"latitude": 10.762, "longitude": 106.660},
+    "equipment": ["Monitor", "Oxy", "Cấp cứu"],
+    "status": "available",
+    "personnel": [
+      {"id": "EMT001", "name": "Nguyễn Hoàng An", "role": "Điều dưỡng cấp cứu"},
+      {"id": "EMT002", "name": "Trần Bá Cường", "role": "Lái xe"}
+    ],
+    "eta_minutes": 10,
+    "capacity": 2
+  },
+  {
+    "id": "A002",
+    "name": "Xe cứu thương 2",
+    "location": {"latitude": 10.772, "longitude": 106.667},
+    "equipment": ["Monitor", "Oxy"],
+    "status": "available",
+    "personnel": [
+      {"id": "EMT003", "name": "Lê Thị Dung", "role": "Điều dưỡng cấp cứu"},
+      {"id": "EMT004", "name": "Phạm Văn Em", "role": "Lái xe"}
+    ],
+    "eta_minutes": 15,
+    "capacity": 1
+  },
+  {
+    "id": "A003",
+    "name": "Xe cứu thương 3",
+    "location": {"latitude": 10.803, "longitude": 106.693},
+    "equipment": ["Monitor", "Oxy", "ICU"],
+    "status": "busy",
+    "personnel": [
+      {"id": "EMT005", "name": "Hoàng Phi Giang", "role": "Điều dưỡng cấp cứu"},
+      {"id": "EMT006", "name": "Vũ Thị Hoa", "role": "Lái xe"}
+    ],
+    "eta_minutes": 30,
+    "capacity": 3
+  }
+]

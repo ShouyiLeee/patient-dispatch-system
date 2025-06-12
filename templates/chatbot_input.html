@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Điều phối Bệnh nhân - AI Medical Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <style>        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="80" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.05)"/></svg>');
+        }
+        .form-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            padding: 2.5rem;
+            margin-top: -3rem;
+            position: relative;
+            z-index: 10;
+        }
+        .chat-preview {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 15px;
+            padding: 2rem;
+            border: none;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+        .chat-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        .ai-badge {
+            background: linear-gradient(45deg, #ff6b6b, #feca57);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">                <div class="col-lg-6">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-hospital text-warning pulse-animation"></i>
+                        Hệ thống Điều phối Bệnh nhân
+                    </h1>
+                    <div class="ai-badge">
+                        <i class="bi bi-robot"></i> Powered by AI
+                    </div>
+                    <h2 class="h3 mb-4">Trợ lý Y tế AI thông minh</h2>
+                    <p class="lead mb-4">
+                        <i class="bi bi-shield-check text-success"></i>
+                        Nhập thông tin triệu chứng của bạn và để AI phân tích, đưa ra lời khuyên y tế và điều phối bệnh viện phù hợp nhất.
+                    </p>
+                    
+                    <!-- Features -->
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-robot feature-icon text-warning"></i>
+                                <div class="ms-3">
+                                    <h6 class="mb-1 fw-bold">AI Phân tích thông minh</h6>
+                                    <small class="text-light">Phân tích triệu chứng tự động trong vài giây</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-hospital feature-icon text-warning"></i>
+                                <div class="ms-3">
+                                    <h6 class="mb-1 fw-bold">Điều phối nhanh chóng</h6>
+                                    <small class="text-light">Tìm bệnh viện phù hợp gần nhất</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-chat-dots feature-icon text-warning"></i>
+                                <div class="ms-3">
+                                    <h6 class="mb-1 fw-bold">Tư vấn trực tuyến</h6>
+                                    <small class="text-light">Trò chuyện với AI 24/7</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="d-flex align-items-center">
+                                <i class="bi bi-lightning feature-icon text-warning"></i>
+                                <div class="ms-3">
+                                    <h6 class="mb-1 fw-bold">Xử lý khẩn cấp</h6>
+                                    <small class="text-light">Phát hiện và ưu tiên cấp cứu</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                  <div class="col-lg-6">
+                    <div class="chat-preview">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-white bg-opacity-20 rounded-circle p-2 me-3">
+                                <i class="bi bi-robot text-warning" style="font-size: 1.8rem;"></i>
+                            </div>
+                            <div>
+                                <h5 class="mb-0 text-white fw-bold">🤖 Trợ lý AI sẵn sàng hỗ trợ</h5>
+                                <small class="text-white-75">Powered by Advanced Medical AI</small>
+                            </div>
+                        </div>
+                        <div class="bg-white bg-opacity-25 rounded-3 p-4 mb-3 border border-white border-opacity-20">
+                            <div class="d-flex align-items-start mb-3">
+                                <div class="bg-success bg-opacity-20 rounded-circle p-2 me-3">
+                                    <i class="bi bi-person-circle text-success" style="font-size: 1.2rem;"></i>
+                                </div>
+                                <div class="flex-grow-1">
+                                    <h6 class="mb-1 text-white fw-bold">
+                                        <span class="badge bg-success bg-opacity-75 text-white px-2 py-1 rounded-pill">
+                                            AI Doctor
+                                        </span>
+                                    </h6>
+                                    <p class="mb-2 text-white" style="line-height: 1.6;">
+                                        Xin chào! 👋 Tôi là trợ lý y tế AI thông minh với khả năng:
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center p-2 bg-white bg-opacity-15 rounded-2">
+                                        <div class="bg-primary bg-opacity-75 rounded-circle p-1 me-2">
+                                            <i class="bi bi-check-circle-fill text-white" style="font-size: 0.9rem;"></i>
+                                        </div>
+                                        <span class="text-white fw-medium">Phân tích triệu chứng chính xác 99.2%</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center p-2 bg-white bg-opacity-15 rounded-2">
+                                        <div class="bg-info bg-opacity-75 rounded-circle p-1 me-2">
+                                            <i class="bi bi-check-circle-fill text-white" style="font-size: 0.9rem;"></i>
+                                        </div>
+                                        <span class="text-white fw-medium">Đưa ra lời khuyên y tế chuyên nghiệp</span>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center p-2 bg-white bg-opacity-15 rounded-2">
+                                        <div class="bg-warning bg-opacity-75 rounded-circle p-1 me-2">
+                                            <i class="bi bi-check-circle-fill text-white" style="font-size: 0.9rem;"></i>
+                                        </div>
+                                        <span class="text-white fw-medium">Điều phối bệnh viện phù hợp trong 30s</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="d-inline-flex align-items-center bg-white bg-opacity-15 rounded-pill px-3 py-2">
+                                <div class="spinner-grow spinner-grow-sm text-warning me-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                                <span class="text-white-75 fst-italic">
+                                    Vui lòng điền form bên dưới để bắt đầu tư vấn...
+                                </span>
+                                <i class="bi bi-arrow-down text-warning ms-2 pulse-animation"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Form Section -->
+    <div class="container">
+        <div class="form-container">            <div class="text-center mb-5">
+                <div class="d-inline-block p-3 bg-primary bg-opacity-10 rounded-circle mb-3">
+                    <i class="bi bi-person-plus text-primary" style="font-size: 2rem;"></i>
+                </div>
+                <h3 class="text-primary fw-bold">Thông tin Bệnh nhân</h3>
+                <p class="text-muted lead">Vui lòng cung cấp thông tin chi tiết để được hỗ trợ tốt nhất từ AI</p>
+            </div>
+
+            <form id="patientForm" action="/process" method="POST" enctype="multipart/form-data">
+                <!-- Sample Data Suggestions -->
+                <div class="alert alert-info mb-4">
+                    <h6><i class="bi bi-lightbulb text-warning"></i> Gợi ý dữ liệu mẫu:</h6>
+                    <div class="row g-2">
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-info btn-sm w-100" onclick="fillSampleData('emergency')">
+                                <i class="bi bi-exclamation-triangle"></i> Trường hợp khẩn cấp
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-warning btn-sm w-100" onclick="fillSampleData('urgent')">
+                                <i class="bi bi-clock"></i> Trường hợp cần xử lý sớm
+                            </button>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-outline-success btn-sm w-100" onclick="fillSampleData('routine')">
+                                <i class="bi bi-check-circle"></i> Trường hợp thông thường
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Patient ID -->
+                    <div class="col-md-6 mb-3">
+                        <label for="patient_id" class="form-label">
+                            <i class="bi bi-card-text text-primary"></i> Mã bệnh nhân
+                        </label>
+                        <input type="text" class="form-control" id="patient_id" name="patient_id" 
+                               value="{{ random_id }}" readonly>
+                    </div>
+
+                    <!-- Emergency checkbox -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label d-block">
+                            <i class="bi bi-exclamation-triangle text-danger"></i> Tình trạng khẩn cấp
+                        </label>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="is_emergency" name="is_emergency">
+                            <label class="form-check-label" for="is_emergency">
+                                Đây là trường hợp cấp cứu
+                            </label>
+                        </div>
+                    </div>
+                </div>                <!-- Description -->
+                <div class="mb-3">
+                    <label for="description" class="form-label">
+                        <i class="bi bi-chat-square-text text-primary"></i> Mô tả triệu chứng *
+                    </label>
+                    <textarea class="form-control" id="description" name="description" rows="4" 
+                              placeholder="Vui lòng mô tả chi tiết các triệu chứng bạn đang gặp phải..."
+                              required></textarea>
+                    <div class="form-text">
+                        <i class="bi bi-info-circle"></i> Càng chi tiết càng giúp AI phân tích chính xác hơn
+                    </div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-3">
+                    <label for="symptom_image" class="form-label">
+                        <i class="bi bi-camera text-primary"></i> Hình ảnh triệu chứng (tùy chọn)
+                    </label>
+                    <div class="input-group">
+                        <input type="file" class="form-control" id="symptom_image" name="symptom_image" 
+                               accept="image/*" onchange="previewImage(this)">
+                        <label class="input-group-text" for="symptom_image">
+                            <i class="bi bi-upload"></i>
+                        </label>
+                    </div>
+                    <div class="form-text">
+                        Hỗ trợ định dạng: JPG, PNG, GIF. Kích thước tối đa: 10MB. AI sẽ phân tích hình ảnh để bổ sung thông tin.
+                    </div>
+                    
+                    <!-- Image Preview -->
+                    <div id="image-preview" class="mt-3" style="display: none;">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <span><i class="bi bi-image"></i> Hình ảnh đã chọn</span>
+                                <button type="button" class="btn-close" onclick="removeImage()"></button>
+                            </div>
+                            <div class="card-body text-center">
+                                <img id="preview-img" class="img-fluid" style="max-height: 200px; border-radius: 8px;">
+                                <div id="ai-analysis" class="mt-3" style="display: none;">
+                                    <div class="alert alert-info">
+                                        <div class="d-flex align-items-center">
+                                            <div class="spinner-border spinner-border-sm me-2" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                            <span>AI đang phân tích hình ảnh...</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="analysis-result" class="mt-3" style="display: none;">
+                                    <div class="alert alert-success">
+                                        <h6><i class="bi bi-robot"></i> Phân tích AI:</h6>
+                                        <div id="analysis-text"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Vitals -->
+                    <div class="col-md-6 mb-3">
+                        <label for="vitals" class="form-label">
+                            <i class="bi bi-heart-pulse text-danger"></i> Chỉ số sinh tồn
+                        </label>
+                        <textarea class="form-control" id="vitals" name="vitals" rows="3" 
+                                  placeholder="VD: Huyết áp: 120/80, Nhịp tim: 75, Nhiệt độ: 36.5°C"></textarea>
+                    </div>
+
+                    <!-- Medical History -->
+                    <div class="col-md-6 mb-3">
+                        <label for="medical_history" class="form-label">
+                            <i class="bi bi-file-medical text-info"></i> Tiền sử bệnh lý
+                        </label>
+                        <textarea class="form-control" id="medical_history" name="medical_history" rows="3" 
+                                  placeholder="Tiền sử bệnh lý, thuốc đang sử dụng..."></textarea>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- Onset Time -->
+                    <div class="col-md-6 mb-3">
+                        <label for="onset_time" class="form-label">
+                            <i class="bi bi-clock text-warning"></i> Thời gian xuất hiện triệu chứng
+                        </label>
+                        <input type="text" class="form-control" id="onset_time" name="onset_time" 
+                               placeholder="VD: 2 giờ trước, sáng nay, hôm qua...">
+                    </div>
+
+                    <!-- Location -->
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">
+                            <i class="bi bi-geo-alt text-success"></i> Vị trí hiện tại
+                        </label>
+                        <div class="row">
+                            <div class="col-6">
+                                <input type="number" step="any" class="form-control" id="latitude" name="latitude" 
+                                       value="10.7743" placeholder="Vĩ độ">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" step="any" class="form-control" id="longitude" name="longitude" 
+                                       value="106.6675" placeholder="Kinh độ">
+                            </div>
+                        </div>
+                        <div class="form-text">
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="getLocation()">
+                                <i class="bi bi-geo-alt"></i> Lấy vị trí hiện tại
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg px-5">
+                        <i class="bi bi-arrow-right-circle"></i> Bắt đầu phân tích và điều phối
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="container mt-5 mb-5">
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <i class="bi bi-1-circle feature-icon"></i>
+                    <h5>Nhập thông tin</h5>
+                    <p class="text-muted">Mô tả triệu chứng và thông tin cần thiết</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <i class="bi bi-2-circle feature-icon"></i>
+                    <h5>AI phân tích</h5>
+                    <p class="text-muted">Hệ thống phân tích và đưa ra khuyến nghị</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center p-4">
+                    <i class="bi bi-3-circle feature-icon"></i>
+                    <h5>Điều phối bệnh viện</h5>
+                    <p class="text-muted">Tìm và điều phối bệnh viện phù hợp</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Sample data for different scenarios
+        const sampleData = {
+            emergency: {
+                description: "Đau ngực dữ dội, khó thở, đổ mồ hôi lạnh từ 30 phút trước. Cảm thấy choáng váng và buồn nôn.",
+                vitals: "Huyết áp: 180/110, Nhịp tim: 110, Nhiệt độ: 36.8°C, SPO2: 88%",
+                medical_history: "Có tiền sử bệnh tim mạch, đang dùng thuốc huyết áp",
+                onset_time: "30 phút trước",
+                is_emergency: true
+            },
+            urgent: {
+                description: "Sốt cao 39°C kéo dài 2 ngày, ho khan, đau họng, mệt mỏi. Có triệu chứng khó nuốt.",
+                vitals: "Huyết áp: 130/85, Nhịp tim: 95, Nhiệt độ: 39.2°C",
+                medical_history: "Không có tiền sử bệnh lý đặc biệt",
+                onset_time: "2 ngày trước",
+                is_emergency: false
+            },
+            routine: {
+                description: "Đau đầu nhẹ, hơi mệt mỏi từ sáng nay. Ăn uống bình thường, không sốt.",
+                vitals: "Huyết áp: 120/80, Nhịp tim: 72, Nhiệt độ: 36.5°C",
+                medical_history: "Không có tiền sử bệnh lý đặc biệt",
+                onset_time: "Sáng nay",
+                is_emergency: false
+            }
+        };
+
+        function fillSampleData(type) {
+            const data = sampleData[type];
+            if (data) {
+                document.getElementById('description').value = data.description;
+                document.getElementById('vitals').value = data.vitals;
+                document.getElementById('medical_history').value = data.medical_history;
+                document.getElementById('onset_time').value = data.onset_time;
+                document.getElementById('is_emergency').checked = data.is_emergency;
+                
+                // Show a toast notification
+                showToast(`Đã điền dữ liệu mẫu: ${type === 'emergency' ? 'Khẩn cấp' : type === 'urgent' ? 'Cần xử lý sớm' : 'Thông thường'}`);
+            }
+        }
+
+        function showToast(message) {
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0';
+            toast.setAttribute('role', 'alert');
+            toast.style.position = 'fixed';
+            toast.style.top = '20px';
+            toast.style.right = '20px';
+            toast.style.zIndex = '9999';
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        <i class="bi bi-check-circle me-2"></i>${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+            
+            document.body.appendChild(toast);
+            
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 3000);
+        }        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    document.getElementById('latitude').value = position.coords.latitude;
+                    document.getElementById('longitude').value = position.coords.longitude;
+                    alert('Vị trí đã được cập nhật!');
+                }, function(error) {
+                    alert('Không thể lấy vị trí hiện tại. Vui lòng nhập thủ công.');
+                });
+            } else {
+                alert('Trình duyệt không hỗ trợ geolocation.');
+            }
+        }
+
+        // Image upload and preview functions
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                
+                // Check file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Kích thước file quá lớn. Vui lòng chọn file nhỏ hơn 10MB.');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('image-preview').style.display = 'block';
+                    
+                    // Start AI analysis
+                    analyzeImage(file);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function removeImage() {
+            document.getElementById('symptom_image').value = '';
+            document.getElementById('image-preview').style.display = 'none';
+            document.getElementById('ai-analysis').style.display = 'none';
+            document.getElementById('analysis-result').style.display = 'none';
+        }
+
+        async function analyzeImage(file) {
+            document.getElementById('ai-analysis').style.display = 'block';
+            document.getElementById('analysis-result').style.display = 'none';
+            
+            try {
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                const response = await fetch('/api/analyze-image', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('analysis-text').innerHTML = result.analysis;
+                    document.getElementById('ai-analysis').style.display = 'none';
+                    document.getElementById('analysis-result').style.display = 'block';
+                    
+                    // Auto-fill description if it's empty
+                    const descriptionField = document.getElementById('description');
+                    if (!descriptionField.value.trim()) {
+                        descriptionField.value = result.suggested_description || '';
+                    }
+                } else {
+                    throw new Error(result.error || 'Lỗi không xác định');
+                }
+            } catch (error) {
+                console.error('Error analyzing image:', error);
+                document.getElementById('ai-analysis').style.display = 'none';
+                document.getElementById('analysis-result').innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i> Không thể phân tích hình ảnh: ${error.message}
+                    </div>
+                `;
+                document.getElementById('analysis-result').style.display = 'block';
+            }
+        }
+
+        // Form validation
+        document.getElementById('patientForm').addEventListener('submit', function(e) {
+            const description = document.getElementById('description').value.trim();
+            if (description.length < 10) {
+                e.preventDefault();
+                alert('Vui lòng mô tả triệu chứng chi tiết hơn (ít nhất 10 ký tự).');
+                return;
+            }
+        });
+    </script>
+</body>
+</html>

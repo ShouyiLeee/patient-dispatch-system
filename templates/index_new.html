@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Điều phối Bệnh nhân Đa Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .workflow-step {
+            padding: 15px;
+            margin: 10px 0;
+            border-left: 4px solid #dee2e6;
+            background: #f8f9fa;
+            transition: all 0.3s;
+        }
+        .workflow-step.active {
+            border-left-color: #007bff;
+            background: #e3f2fd;
+        }
+        .workflow-step.completed {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .workflow-step.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .progress-container {
+            margin: 20px 0;
+        }
+        .result-card {
+            margin-top: 20px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+        .chat-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f8f9fa;
+        }
+        .chat-message {
+            margin: 10px 0;
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .chat-message.user {
+            background: #007bff;
+            color: white;
+            margin-left: 20%;
+        }
+        .chat-message.bot {
+            background: #e9ecef;
+            margin-right: 20%;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-hospital-alt"></i>
+                Hệ thống Điều phối Bệnh nhân
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/dashboard">
+                    <i class="fas fa-chart-line"></i>
+                    Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <!-- Panel nhập thông tin -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5><i class="fas fa-user-injured"></i> Thông tin Bệnh nhân</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="patientForm">
+                            <div class="mb-3">
+                                <label for="ma_benh_nhan" class="form-label">Mã bệnh nhân (tùy chọn)</label>
+                                <input type="text" class="form-control" id="ma_benh_nhan" 
+                                       placeholder="Để trống để tự động tạo">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="mo_ta" class="form-label">Mô tả tình trạng *</label>
+                                <textarea class="form-control" id="mo_ta" rows="4" required
+                                          placeholder="Ví dụ: Bệnh nhân nam, 45 tuổi, đột ngột đau ngực dữ dội, khó thở, vã mồ hôi từ 30 phút trước..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="anh_benh_nhan" class="form-label">Ảnh y tế (tùy chọn)</label>
+                                <input type="file" class="form-control" id="anh_benh_nhan" accept="image/*">
+                                <div class="form-text">Ảnh X-quang, CT, MRI hoặc ảnh triệu chứng</div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vị trí</label>
+                                    <div class="input-group mb-3">
+                                        <span class="input-group-text">Lat</span>
+                                        <input type="number" class="form-control" id="latitude" 
+                                               value="10.77" step="0.01" placeholder="10.77">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">Lng</span>
+                                            <input type="number" class="form-control" id="longitude" 
+                                                   value="106.67" step="0.01" placeholder="106.67">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Chỉ số sinh tồn</label>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="nhip_tim" 
+                                               placeholder="Nhịp tim (lần/phút)">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="huyet_ap" 
+                                               placeholder="Huyết áp (mmHg)">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="text" class="form-control" id="spo2" 
+                                               placeholder="SpO2 (%)">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="tien_su_benh" class="form-label">Tiền sử bệnh (cách nhau bằng dấu phẩy)</label>
+                                <input type="text" class="form-control" id="tien_su_benh" 
+                                       placeholder="Ví dụ: Tăng huyết áp, Đái tháo đường">
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">
+                                <i class="fas fa-play-circle"></i>
+                                Bắt đầu Điều phối
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Panel hỏi đáp nhanh -->
+                <div class="card mt-4">
+                    <div class="card-header bg-info text-white">
+                        <h6><i class="fas fa-comments"></i> Hỏi đáp nhanh với AI</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="chat-container" id="chatContainer">
+                            <div class="chat-message bot">
+                                Xin chào! Tôi có thể giúp bạn tư vấn y tế cơ bản. Hãy đặt câu hỏi của bạn.
+                            </div>
+                        </div>
+                        <div class="input-group mt-3">
+                            <input type="text" class="form-control" id="chatInput" 
+                                   placeholder="Nhập câu hỏi của bạn...">
+                            <button class="btn btn-info" id="chatBtn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Panel hiển thị tiến trình -->
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5><i class="fas fa-cogs"></i> Tiến trình Xử lý</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="workflowProgress" style="display: none;">
+                            <div class="progress-container">
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: 0%" id="progressBar"></div>
+                                </div>
+                                <small class="text-muted" id="progressText">Đang chuẩn bị...</small>
+                            </div>
+                            
+                            <div id="workflowSteps">
+                                <div class="workflow-step" id="step-triage">
+                                    <h6><i class="fas fa-search"></i> Phân tích Triage</h6>
+                                    <p>Phân tích triệu chứng và mức độ ưu tiên</p>
+                                </div>
+                                
+                                <div class="workflow-step" id="step-patient_care">
+                                    <h6><i class="fas fa-route"></i> Điều phối Chăm sóc</h6>
+                                    <p>Quyết định luồng xử lý phù hợp</p>
+                                </div>
+                                
+                                <div class="workflow-step" id="step-qa" style="display: none;">
+                                    <h6><i class="fas fa-comments"></i> Tư vấn Y tế</h6>
+                                    <p>Cung cấp lời khuyên và hướng dẫn</p>
+                                </div>
+                                
+                                <div class="workflow-step" id="step-hospital" style="display: none;">
+                                    <h6><i class="fas fa-hospital"></i> Tìm Bệnh viện</h6>
+                                    <p>Tìm bệnh viện phù hợp cho điều trị</p>
+                                </div>
+                                
+                                <div class="workflow-step" id="step-dispatch" style="display: none;">
+                                    <h6><i class="fas fa-ambulance"></i> Điều phối Cấp cứu</h6>
+                                    <p>Điều phối xe cứu thương khẩn cấp</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div id="noWorkflow" class="text-center text-muted py-5">
+                            <i class="fas fa-clipboard-list fa-3x"></i>
+                            <h6 class="mt-3">Chưa có quy trình nào đang chạy</h6>
+                            <p>Vui lòng nhập thông tin bệnh nhân để bắt đầu</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Panel kết quả -->
+                <div class="result-card" id="resultCard" style="display: none;">
+                    <h5><i class="fas fa-check-circle text-success"></i> Kết quả Điều phối</h5>
+                    <div id="resultContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    
+    <script>
+        // Khởi tạo SocketIO
+        const socket = io();
+        
+        let currentWorkflowId = null;
+        
+        // Xử lý form submit
+        document.getElementById('patientForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const originalText = submitBtn.innerHTML;
+            
+            // Disable button và hiển thị loading
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xử lý...';
+            
+            try {
+                // Thu thập dữ liệu form
+                const formData = {
+                    ma_benh_nhan: document.getElementById('ma_benh_nhan').value,
+                    mo_ta: document.getElementById('mo_ta').value,
+                    vi_tri: {
+                        latitude: parseFloat(document.getElementById('latitude').value) || 10.77,
+                        longitude: parseFloat(document.getElementById('longitude').value) || 106.67
+                    },
+                    chi_so_sinh_ton: {
+                        nhip_tim: document.getElementById('nhip_tim').value,
+                        huyet_ap: document.getElementById('huyet_ap').value,
+                        spo2: document.getElementById('spo2').value
+                    },
+                    tien_su_benh: document.getElementById('tien_su_benh').value.split(',').map(s => s.trim()).filter(s => s)
+                };
+                
+                // Xử lý ảnh nếu có
+                const anhInput = document.getElementById('anh_benh_nhan');
+                if (anhInput.files && anhInput.files[0]) {
+                    const file = anhInput.files[0];
+                    formData.anh = await fileToBase64(file);
+                }
+                
+                // Gọi API
+                const response = await fetch('/api/bat-dau-workflow', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.thanh_cong) {
+                    currentWorkflowId = result.workflow_id;
+                    hienThiTienTrinh();
+                    socket.emit('join_workflow', {workflow_id: currentWorkflowId});
+                } else {
+                    alert('Lỗi: ' + (result.loi || 'Không xác định'));
+                }
+                
+            } catch (error) {
+                console.error('Lỗi:', error);
+                alert('Có lỗi xảy ra: ' + error.message);
+            } finally {
+                // Restore button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        });
+        
+        // Hàm chuyển file thành base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
+        // Hiển thị tiến trình
+        function hienThiTienTrinh() {
+            document.getElementById('noWorkflow').style.display = 'none';
+            document.getElementById('workflowProgress').style.display = 'block';
+            document.getElementById('resultCard').style.display = 'none';
+            
+            // Reset các step
+            const steps = document.querySelectorAll('.workflow-step');
+            steps.forEach(step => {
+                step.className = 'workflow-step';
+                step.style.display = 'none';
+            });
+            
+            // Hiển thị step đầu tiên
+            document.getElementById('step-triage').style.display = 'block';
+        }
+        
+        // Xử lý Socket events
+        socket.on('workflow_update', function(data) {
+            if (data.workflow_id === currentWorkflowId) {
+                capNhatTienTrinh(data);
+            }
+        });
+        
+        socket.on('workflow_complete', function(data) {
+            if (data.workflow_id === currentWorkflowId) {
+                hienThiKetQua(data.ket_qua);
+            }
+        });
+        
+        socket.on('workflow_error', function(data) {
+            if (data.workflow_id === currentWorkflowId) {
+                hienThiLoi(data.loi);
+            }
+        });
+        
+        // Cập nhật tiến trình
+        function capNhatTienTrinh(data) {
+            const buoc = data.buoc;
+            const thongBao = data.thong_bao;
+            
+            // Cập nhật progress text
+            document.getElementById('progressText').textContent = thongBao;
+            
+            // Đánh dấu step hiện tại
+            if (buoc) {
+                // Hiển thị step tương ứng
+                const stepElement = document.getElementById('step-' + buoc);
+                if (stepElement) {
+                    stepElement.style.display = 'block';
+                    stepElement.className = 'workflow-step active';
+                }
+                
+                // Đánh dấu các step trước đó là completed
+                const allSteps = ['triage', 'patient_care', 'qa', 'hospital', 'dispatch'];
+                const currentIndex = allSteps.indexOf(buoc);
+                for (let i = 0; i < currentIndex; i++) {
+                    const prevStep = document.getElementById('step-' + allSteps[i]);
+                    if (prevStep && prevStep.style.display !== 'none') {
+                        prevStep.className = 'workflow-step completed';
+                    }
+                }
+                
+                // Cập nhật progress bar
+                const progress = ((currentIndex + 1) / allSteps.length) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            }
+        }
+        
+        // Hiển thị kết quả
+        function hienThiKetQua(ketQua) {
+            // Đánh dấu tất cả step là completed
+            const steps = document.querySelectorAll('.workflow-step');
+            steps.forEach(step => {
+                if (step.style.display !== 'none') {
+                    step.className = 'workflow-step completed';
+                }
+            });
+            
+            // Cập nhật progress bar
+            document.getElementById('progressBar').style.width = '100%';
+            document.getElementById('progressText').textContent = 'Hoàn thành!';
+            
+            // Hiển thị kết quả
+            document.getElementById('resultCard').style.display = 'block';
+            
+            let resultHtml = '';
+            const ketQuaCuoi = ketQua.ket_qua_cuoi_cung || {};
+            
+            if (ketQuaCuoi.loai === 'tu_van_qa') {
+                resultHtml = `
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-comments"></i> Tư vấn Y tế</h6>
+                        <p>${ketQuaCuoi.noi_dung || 'Không có nội dung'}</p>
+                        <small><strong>Hành động đề xuất:</strong> ${ketQuaCuoi.hanh_dong_de_xuat || 'Không có'}</small>
+                    </div>
+                `;
+            } else if (ketQuaCuoi.loai === 'chuyen_benh_vien') {
+                const benhVien = ketQuaCuoi.benh_vien || {};
+                resultHtml = `
+                    <div class="alert alert-warning">
+                        <h6><i class="fas fa-hospital"></i> Chuyển Bệnh viện</h6>
+                        <p><strong>Bệnh viện:</strong> ${benhVien.ten || 'Không xác định'}</p>
+                        <p><strong>Khoảng cách:</strong> ${benhVien.khoang_cach || 'N/A'} km</p>
+                        <small><strong>Hành động:</strong> ${ketQuaCuoi.hanh_dong_de_xuat || 'Đến bệnh viện'}</small>
+                    </div>
+                `;
+            } else if (ketQua.xe_duoc_chon) {
+                const xe = ketQua.xe_duoc_chon || {};
+                const benhVien = ketQua.benh_vien_duoc_chon || {};
+                resultHtml = `
+                    <div class="alert alert-danger">
+                        <h6><i class="fas fa-ambulance"></i> Điều phối Cấp cứu</h6>
+                        <p><strong>Xe cứu thương:</strong> ${xe.loai || 'Không xác định'}</p>
+                        <p><strong>Thời gian đến:</strong> ${ketQua.thoi_gian_du_kien || 'Không xác định'}</p>
+                        ${benhVien.ten ? `<p><strong>Bệnh viện tiếp nhận:</strong> ${benhVien.ten}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            // Thông tin chi tiết
+            resultHtml += `
+                <div class="mt-3">
+                    <h6>Thông tin chi tiết:</h6>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Mức độ ưu tiên:</strong> 
+                            <span class="badge bg-${ketQua.muc_do_uu_tien >= 4 ? 'danger' : ketQua.muc_do_uu_tien >= 3 ? 'warning' : 'success'}">
+                                ${ketQua.muc_do_uu_tien || 'N/A'}/5
+                            </span>
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Chuyên khoa:</strong> ${ketQua.chuyen_khoa || 'Chung'}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Cần cấp cứu:</strong> 
+                            <span class="badge bg-${ketQua.can_cap_cuu ? 'danger' : 'success'}">
+                                ${ketQua.can_cap_cuu ? 'Có' : 'Không'}
+                            </span>
+                        </li>
+                    </ul>
+                </div>
+            `;
+            
+            document.getElementById('resultContent').innerHTML = resultHtml;
+        }
+        
+        // Hiển thị lỗi
+        function hienThiLoi(loi) {
+            document.getElementById('resultCard').style.display = 'block';
+            document.getElementById('resultContent').innerHTML = `
+                <div class="alert alert-danger">
+                    <h6><i class="fas fa-exclamation-triangle"></i> Có lỗi xảy ra</h6>
+                    <p>${loi}</p>
+                </div>
+            `;
+        }
+        
+        // Chat functionality
+        document.getElementById('chatBtn').addEventListener('click', guiTinNhanChat);
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                guiTinNhanChat();
+            }
+        });
+        
+        async function guiTinNhanChat() {
+            const input = document.getElementById('chatInput');
+            const cauHoi = input.value.trim();
+            
+            if (!cauHoi) return;
+            
+            // Hiển thị tin nhắn người dùng
+            themTinNhanChat(cauHoi, 'user');
+            input.value = '';
+            
+            try {
+                const response = await fetch('/api/hoi-dap', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({cau_hoi: cauHoi})
+                });
+                
+                const result = await response.json();
+                
+                if (result.thanh_cong) {
+                    themTinNhanChat(result.tra_loi, 'bot');
+                } else {
+                    themTinNhanChat('Xin lỗi, có lỗi xảy ra: ' + (result.loi || 'Không xác định'), 'bot');
+                }
+                
+            } catch (error) {
+                console.error('Lỗi chat:', error);
+                themTinNhanChat('Xin lỗi, không thể kết nối với hệ thống.', 'bot');
+            }
+        }
+        
+        function themTinNhanChat(noiDung, loai) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${loai}`;
+            messageDiv.textContent = noiDung;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+    </script>
+</body>
+</html>

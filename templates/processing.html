@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xử lý thông tin bệnh nhân | Hệ thống Điều phối</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row bg-primary text-white p-3">
+            <div class="col">
+                <h2>Hệ Thống Điều Phối Bệnh Nhân</h2>
+                <p>Đang xử lý thông tin bệnh nhân trong hệ thống đa agent...</p>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title">Thông tin bệnh nhân</h5>
+                    </div>
+                    <div class="card-body" id="patient-info">
+                        <div class="mb-3">
+                            <strong>ID:</strong> <span id="patient-id">{{ patient_id }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Mô tả:</strong> 
+                            <p id="patient-description">{{ description }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong>Vị trí:</strong> 
+                            <p id="patient-location">Vĩ độ: {{ location.latitude }}, Kinh độ: {{ location.longitude }}</p>
+                        </div>
+                        {% if medical_history %}
+                        <div class="mb-3">
+                            <strong>Tiền sử:</strong> 
+                            <p id="patient-history">{{ medical_history }}</p>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <strong>Thời gian khởi phát:</strong> 
+                            <p id="onset-time">{{ onset_time }}</p>
+                        </div>
+                        {% if vitals %}
+                        <div class="mb-3">
+                            <strong>Dấu hiệu sinh tồn:</strong> 
+                            <p id="patient-vitals">{{ vitals }}</p>
+                        </div>
+                        {% endif %}
+                        <div class="mb-3">
+                            <strong>Trạng thái:</strong> 
+                            <span id="emergency-status" class="badge {% if is_emergency %}bg-danger{% else %}bg-warning{% endif %}">
+                                {% if is_emergency %}Khẩn cấp{% else %}Thông thường{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title">Tiến trình xử lý</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="processing-timeline" class="timeline">
+                            <!-- Triage Agent -->
+                            <div class="timeline-item" id="triage-step">
+                                <div class="timeline-badge bg-primary">
+                                    <i class="bi bi-1-circle"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Triage Agent</h4>
+                                        <p><small class="text-muted" id="triage-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Đang phân tích thông tin bệnh nhân...</span>
+                                        <div id="triage-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                        <div id="triage-reasoning" class="mt-2">
+                                            <!-- Reasoning sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                              <!-- Patient Care Agent -->
+                            <div class="timeline-item" id="patient-care-step">
+                                <div class="timeline-badge bg-secondary">
+                                    <i class="bi bi-2-circle"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Patient Care Agent</h4>
+                                        <p><small class="text-muted" id="patient-care-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Đang phân luồng bệnh nhân...</span>
+                                        <div id="patient-care-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Hospital Agent -->
+                            <div class="timeline-item" id="hospital-step">
+                                <div class="timeline-badge bg-info">
+                                    <i class="bi bi-3-circle"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Hospital Agent</h4>
+                                        <p><small class="text-muted" id="hospital-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Chờ kết quả phân loại...</span>
+                                        <div id="hospital-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                        <div id="hospital-reasoning" class="mt-2">
+                                            <!-- Reasoning sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dispatch Agent -->                            <div class="timeline-item" id="dispatch-step">
+                                <div class="timeline-badge bg-secondary">
+                                    <i class="bi bi-4-circle"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Dispatch Agent</h4>
+                                        <p><small class="text-muted" id="dispatch-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Chờ kết quả phân loại...</span>
+                                        <div id="dispatch-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Optimizer Agent -->                            <div class="timeline-item" id="optimizer-step">
+                                <div class="timeline-badge bg-secondary">
+                                    <i class="bi bi-5-circle"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Optimizer Agent</h4>
+                                        <p><small class="text-muted" id="optimizer-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Chờ kết quả từ các agent khác...</span>
+                                        <div id="optimizer-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                        <div id="optimizer-reasoning" class="mt-2">
+                                            <!-- Reasoning sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Final Results -->
+                            <div class="timeline-item" id="final-step">
+                                <div class="timeline-badge bg-secondary">
+                                    <i class="bi bi-flag-fill"></i>
+                                </div>
+                                <div class="timeline-panel">
+                                    <div class="timeline-heading">
+                                        <h4 class="timeline-title">Kết quả</h4>
+                                        <p><small class="text-muted" id="final-time">Đang đợi...</small></p>
+                                    </div>
+                                    <div class="timeline-body">
+                                        <div class="spinner-border spinner-border-sm" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <span>Chờ hoàn thành tất cả quy trình...</span>
+                                        <div id="final-result" class="mt-2 d-none">
+                                            <!-- Kết quả sẽ hiển thị ở đây -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3 mb-5">
+            <div class="col-md-12 text-center">
+                <div id="progress-indicator" class="progress mb-3" style="height: 25px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 0%;" id="progress-bar">0%</div>
+                </div>
+                <div id="processing-message">Đang bắt đầu xử lý thông tin bệnh nhân...</div>
+                <div class="mt-3 d-none" id="result-actions">
+                    <a href="/results" class="btn btn-success">Xem kết quả chi tiết</a>
+                    <a href="/" class="btn btn-primary">Quay lại trang chủ</a>
+                </div>
+            </div>
+        </div>
+    </div>    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/patient-care-handler.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Kết nối Socket.IO
+            const socket = io();
+            const flowId = "{{ flow_id }}";
+            let currentStep = 0;
+            const totalSteps = 5; // Triage, Hospital, Dispatch, Optimizer, Final
+            
+            // Xử lý tiến trình
+            function updateProgress(step, data) {
+                currentStep = step;
+                const percent = Math.min(Math.round((step / totalSteps) * 100), 100);
+                document.getElementById('progress-bar').style.width = percent + '%';
+                document.getElementById('progress-bar').textContent = percent + '%';
+                
+                // Cập nhật các timeline item
+                switch(step) {
+                    case 1: // Triage
+                        updateStep('triage', 'bg-success', data);
+                        break;
+                    case 2: // Hospital
+                        updateStep('hospital', 'bg-success', data);
+                        document.getElementById('hospital-step').querySelector('.timeline-badge').classList.remove('bg-secondary');
+                        document.getElementById('hospital-step').querySelector('.timeline-badge').classList.add('bg-primary');
+                        break;
+                    case 3: // Dispatch
+                        updateStep('dispatch', 'bg-success', data);
+                        document.getElementById('dispatch-step').querySelector('.timeline-badge').classList.remove('bg-secondary');
+                        document.getElementById('dispatch-step').querySelector('.timeline-badge').classList.add('bg-primary');
+                        break;
+                    case 4: // Optimizer
+                        updateStep('optimizer', 'bg-success', data);
+                        document.getElementById('optimizer-step').querySelector('.timeline-badge').classList.remove('bg-secondary');
+                        document.getElementById('optimizer-step').querySelector('.timeline-badge').classList.add('bg-primary');
+                        break;
+                    case 5: // Final
+                        updateStep('final', 'bg-success', data);
+                        document.getElementById('final-step').querySelector('.timeline-badge').classList.remove('bg-secondary');
+                        document.getElementById('final-step').querySelector('.timeline-badge').classList.add('bg-primary');
+                        
+                        // Hiển thị nút kết quả
+                        document.getElementById('result-actions').classList.remove('d-none');
+                        document.getElementById('processing-message').textContent = 'Xử lý hoàn tất!';
+                        break;
+                }
+            }
+            
+            function updateStep(stepId, badgeClass, data) {
+                const stepElement = document.getElementById(stepId + '-step');
+                const resultElement = document.getElementById(stepId + '-result');
+                const timeElement = document.getElementById(stepId + '-time');
+                
+                // Cập nhật thời gian
+                timeElement.textContent = new Date().toLocaleTimeString();
+                
+                // Ẩn spinner
+                stepElement.querySelector('.spinner-border').classList.add('d-none');
+                
+                // Hiển thị kết quả
+                resultElement.classList.remove('d-none');
+                
+                // Thêm nội dung kết quả tùy thuộc vào loại agent
+                if (data) {
+                    let resultHTML = '';
+                    
+                    switch(stepId) {
+                        case 'triage':
+                            resultHTML = `
+                                <div class="alert alert-info">
+                                    <strong>Triệu chứng:</strong> ${data.symptoms ? data.symptoms.map(s => s.name).join(', ') : 'Không xác định'}<br>
+                                    <strong>Mức độ ưu tiên:</strong> ${data.priority || 'Không xác định'}<br>
+                                    <strong>Chuyên khoa:</strong> ${data.specialty || 'Không xác định'}<br>
+                                    <strong>Cần cấp cứu:</strong> ${data.needs_emergency ? 'Có' : 'Không'}
+                                </div>
+                            `;
+                            break;
+                        case 'hospital':
+                            if (data.hospitals && data.hospitals.length > 0) {
+                                resultHTML = `<div class="alert alert-info"><strong>Đã tìm thấy ${data.hospitals.length} bệnh viện phù hợp:</strong><ul>`;
+                                data.hospitals.forEach((hospital, i) => {
+                                    resultHTML += `<li>${hospital.name} (${hospital.distance_km} km)</li>`;
+                                });
+                                resultHTML += `</ul></div>`;
+                            } else {
+                                resultHTML = `<div class="alert alert-warning">Không tìm thấy bệnh viện phù hợp</div>`;
+                            }
+                            break;
+                        case 'dispatch':
+                            if (data.ambulances && data.ambulances.length > 0) {
+                                resultHTML = `<div class="alert alert-info"><strong>Đã tìm thấy ${data.ambulances.length} xe cứu thương:</strong><ul>`;
+                                data.ambulances.forEach((ambulance, i) => {
+                                    resultHTML += `<li>${ambulance.name} - ETA: ${ambulance.eta_minutes} phút</li>`;
+                                });
+                                resultHTML += `</ul></div>`;
+                            } else {
+                                resultHTML = `<div class="alert alert-warning">Không tìm thấy xe cứu thương</div>`;
+                            }
+                            break;
+                        case 'optimizer':
+                            resultHTML = `
+                                <div class="alert alert-success">
+                                    <strong>Bệnh viện tối ưu:</strong> ${data.optimized_hospital ? data.optimized_hospital.name : 'Không có'}<br>
+                                    <strong>Xe cứu thương tối ưu:</strong> ${data.optimized_ambulance ? data.optimized_ambulance.name : 'Không có'}<br>
+                                    <strong>Thời gian dự kiến:</strong> ${data.eta_minutes || 'N/A'} phút
+                                </div>
+                            `;
+                            break;
+                        case 'final':
+                            resultHTML = `
+                                <div class="alert alert-success">
+                                    <strong>Xử lý thành công!</strong><br>
+                                    Đã chọn ${data.optimized_hospital ? data.optimized_hospital.name : 'chưa có bệnh viện'}<br>
+                                    Đã điều động ${data.optimized_ambulance ? data.optimized_ambulance.name : 'chưa có xe cứu thương'}<br>
+                                    Thời gian đến dự kiến: ${data.estimated_arrival_time || 'Không xác định'}
+                                </div>
+                                <a href="/results" class="btn btn-primary">Xem kết quả chi tiết</a>
+                            `;
+                            break;
+                    }
+                    
+                    resultElement.innerHTML = resultHTML;
+                }
+                
+                // Cập nhật message
+                if (stepId === 'final') {
+                    document.getElementById('processing-message').textContent = 'Xử lý hoàn tất!';
+                } else {
+                    const nextStep = {
+                        'triage': 'Đang tìm bệnh viện phù hợp...',
+                        'hospital': 'Đang tìm xe cứu thương...',
+                        'dispatch': 'Đang tối ưu hóa kết quả...',
+                        'optimizer': 'Đang hoàn thiện kết quả...'
+                    };
+                    document.getElementById('processing-message').textContent = nextStep[stepId] || '';
+                }
+            }
+            
+            // Lắng nghe sự kiện từ server
+            socket.on('connect', function() {
+                console.log('Connected to server');
+                socket.emit('join_room', { flow_id: flowId });
+            });
+              socket.on('triage_update', function(data) {
+                updateProgress(1, data);
+            });
+            
+            socket.on('patient_care_update', function(data) {
+                updateProgress(2, data);
+            });
+            
+            socket.on('hospital_update', function(data) {
+                console.log('Hospital update:', data);
+                
+                // Update UI
+                const hospitalStep = document.getElementById('hospital-step');
+                const hospitalResult = document.getElementById('hospital-result');
+                const hospitalTime = document.getElementById('hospital-time');
+                
+                if (hospitalStep) {
+                    hospitalStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    hospitalStep.querySelector('.spinner-border').style.display = 'none';
+                }
+                
+                if (hospitalTime) {
+                    hospitalTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                if (hospitalResult) {
+                    hospitalResult.classList.remove('d-none');
+                    hospitalResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Kết quả tìm kiếm bệnh viện:</strong><br>
+                            <strong>Bệnh viện đề xuất:</strong> ${data.recommended_hospital}<br>
+                            <strong>Số lượng bệnh viện khả dụng:</strong> ${data.available_hospitals ? data.available_hospitals.length : 0}
+                        </div>
+                    `;
+                    
+                    // Display reasoning if available
+                    if (data.reasoning) {
+                        displayReasoning('hospital-reasoning', data.reasoning);
+                    }
+                }
+                
+                // Auto-proceed to next step
+                setTimeout(() => {
+                    startOptimizer();
+                }, 1000);
+            });
+            
+            socket.on('dispatch_update', function(data) {
+                updateProgress(4, data);
+            });
+            
+            socket.on('optimizer_update', function(data) {
+                updateProgress(5, data);
+                
+                // Check if we need to redirect to chatbot
+                if (data.redirect_to_chatbot && data.chatbot_url) {
+                    setTimeout(function() {
+                        window.location.href = data.chatbot_url;
+                    }, 3000); // Give time for the user to see the completion
+                }
+            });
+            
+            socket.on('flow_completed', function(data) {
+                updateProgress(6, data);
+                
+                console.log('Flow completed:', data);
+                  // Show completion message
+                const completionStep = document.getElementById('final-step');
+                if (completionStep) {
+                    completionStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    completionStep.querySelector('.spinner-border').style.display = 'none';
+                    completionStep.querySelector('.timeline-body').innerHTML = `
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Hoàn thành điều phối bệnh nhân!
+                            <br><small>Chuyển hướng đến trang tổng hợp...</small>
+                        </div>
+                    `;
+                }
+                
+                // Redirect to dashboard after 3 seconds
+                setTimeout(() => {
+                    window.location.href = data.redirect_url || '/dashboard';
+                }, 3000);
+            });
+            
+            // Simulate updates for demo if needed
+            {% if simulate_updates %}
+            simulateUpdates();
+            {% endif %}
+              function simulateUpdates() {
+                // Simulate triage
+                setTimeout(() => {
+                    updateProgress(1, {
+                        symptoms: [
+                            {name: "Bất tỉnh", severity: "Cao"},
+                            {name: "Da tái", severity: "Cao"},
+                            {name: "Mồ hôi lạnh", severity: "Trung bình"}
+                        ],
+                        priority: 5,
+                        specialty: "Tim mạch",
+                        needs_emergency: true
+                    });
+                }, 2000);
+                
+                // Simulate patient care agent
+                setTimeout(() => {
+                    // Simulate the patient care update
+                    const patientCareData = {
+                        route_to: "emergency",
+                        action: "dispatch_ambulance",
+                        message: "Đây là trường hợp khẩn cấp, đang điều phối xe cứu thương và bệnh viện.",
+                        patient_id: "P12345"
+                    };
+                    
+                    // Manual update for patient care step
+                    document.getElementById('patient-care-step').classList.add('timeline-item-active');
+                    document.getElementById('patient-care-time').textContent = new Date().toLocaleTimeString();
+                    
+                    // Remove spinner
+                    const patientCareBody = document.getElementById('patient-care-step').querySelector('.timeline-body');
+                    patientCareBody.innerHTML = "";
+                    
+                    const resultDiv = document.getElementById('patient-care-result');
+                    resultDiv.classList.remove('d-none');
+                    
+                    // Format patient care results
+                    let routeText = "";
+                    let routeClass = "";
+                    
+                    switch(patientCareData.route_to) {
+                        case 'chatbot':
+                            routeText = "Tư vấn trực tuyến";
+                            routeClass = "info";
+                            break;
+                        case 'hospital':
+                            routeText = "Bệnh viện";
+                            routeClass = "warning";
+                            break;
+                        case 'emergency':
+                            routeText = "Cấp cứu";
+                            routeClass = "danger";
+                            break;
+                        default:
+                            routeText = "Không xác định";
+                            routeClass = "secondary";
+                    }
+                    
+                    let resultHTML = `
+                        <div class="alert alert-${routeClass} mb-2">
+                            <strong>Quyết định:</strong> ${patientCareData.message || 'Đang phân luồng bệnh nhân'}
+                        </div>
+                        <strong>Điều hướng đến:</strong> <span class="badge bg-${routeClass}">${routeText}</span><br>
+                    `;
+                    
+                    resultDiv.innerHTML = resultHTML;
+                    patientCareBody.appendChild(resultDiv);
+                    
+                    // Update progress bar
+                    document.getElementById('progress-bar').style.width = '40%';
+                    document.getElementById('progress-bar').textContent = '40%';
+                }, 3000);
+                  // Simulate hospital
+                setTimeout(() => {
+                    updateProgress(3, {
+                        hospitals: [
+                            {id: "H001", name: "Bệnh viện Chợ Rẫy", distance_km: 2.3, specialty_match: true},
+                            {id: "H003", name: "Bệnh viện Nhân Dân Gia Định", distance_km: 5.1, specialty_match: true}
+                        ],
+                        is_emergency: true
+                    });
+                }, 5000);
+                
+                // Simulate dispatch
+                setTimeout(() => {
+                    updateProgress(4, {
+                        ambulances: [
+                            {id: "A001", name: "Xe cứu thương 1", eta_minutes: 7},
+                            {id: "A002", name: "Xe cứu thương 2", eta_minutes: 12}
+                        ],
+                        is_emergency: true
+                    });
+                }, 7000);
+                  // Simulate optimizer
+                setTimeout(() => {
+                    updateProgress(5, {
+                        optimized_hospital: {id: "H001", name: "Bệnh viện Chợ Rẫy"},
+                        optimized_ambulance: {id: "A001", name: "Xe cứu thương 1"},
+                        eta_minutes: 7,
+                        route_to: "emergency"
+                    });
+                }, 9000);
+                
+                // Simulate final
+                setTimeout(() => {
+                    updateProgress(6, {
+                        optimized_hospital: {id: "H001", name: "Bệnh viện Chợ Rẫy"},
+                        optimized_ambulance: {id: "A001", name: "Xe cứu thương 1"},
+                        eta_minutes: 7,
+                        estimated_arrival_time: "14:25",
+                        route_to: "emergency"
+                    });
+                }, 11000);
+            }
+        });
+    </script>
+    <!-- Add reasoning display functionality -->
+        <script>
+            function displayReasoning(elementId, reasoning) {
+                const element = document.getElementById(elementId);
+                if (element && reasoning) {
+                    // Convert markdown-style formatting to HTML
+                    const formattedReasoning = reasoning
+                        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                        .replace(/🔍|🏥|📋|🎯/g, '<span class="me-1">$&</span>')
+                        .replace(/- (.*)/g, '<li>$1</li>')
+                        .replace(/\n/g, '<br>');
+                    
+                    element.innerHTML = `
+                        <div class="alert alert-info mt-3">
+                            <h6><i class="bi bi-lightbulb"></i> Lý do quyết định:</h6>
+                            <div class="reasoning-content">${formattedReasoning}</div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Update existing socket handlers
+            socket.on('triage_update', function(data) {
+                console.log('Triage update:', data);
+                
+                // Update UI
+                const triageStep = document.getElementById('triage-step');
+                const triageResult = document.getElementById('triage-result');
+                const triageTime = document.getElementById('triage-time');
+                
+                if (triageStep) {
+                    triageStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    triageStep.querySelector('.spinner-border').style.display = 'none';
+                }
+                
+                if (triageTime) {
+                    triageTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                if (triageResult) {
+                    triageResult.classList.remove('d-none');
+                    triageResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Kết quả phân tích:</strong><br>
+                            <strong>Mức độ ưu tiên:</strong> ${data.priority}/5<br>
+                            <strong>Chuyên khoa:</strong> ${data.specialty}<br>
+                            <strong>Cần cấp cứu:</strong> ${data.needs_emergency ? 'Có' : 'Không'}
+                        </div>
+                    `;
+                    
+                    // Display reasoning if available
+                    if (data.reasoning) {
+                        displayReasoning('triage-reasoning', data.reasoning);
+                    }
+                }
+                
+                // Auto-proceed to next step
+                setTimeout(() => {
+                    startPatientCareStep();
+                }, 1000);
+            });
+
+            socket.on('optimizer_update', function(data) {
+                console.log('Optimizer update:', data);
+                
+                // Update UI
+                const optimizerStep = document.getElementById('optimizer-step');
+                const optimizerResult = document.getElementById('optimizer-result');
+                const optimizerTime = document.getElementById('optimizer-time');
+                
+                if (optimizerStep) {
+                    optimizerStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    optimizerStep.querySelector('.spinner-border').style.display = 'none';
+                }
+                
+                if (optimizerTime) {
+                    optimizerTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                if (optimizerResult) {
+                    optimizerResult.classList.remove('d-none');
+                    optimizerResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Kết quả điều phối:</strong><br>
+                            <strong>Bệnh viện:</strong> ${data.selected_hospital}<br>
+                            <strong>Thời gian dự kiến:</strong> ${data.estimated_time}<br>
+                            <strong>Xe cấp cứu:</strong> ${data.ambulance_assigned}
+                        </div>
+                    `;
+                    
+                    // Display reasoning if available
+                    if (data.reasoning) {
+                        displayReasoning('optimizer-reasoning', data.reasoning);
+                    }
+                }
+                
+                // Auto-proceed to completion
+                setTimeout(() => {
+                    completeProcessing();
+                }, 2000);
+            });
+            
+            socket.on('hospital_update', function(data) {
+                console.log('Hospital update:', data);
+                
+                // Update UI
+                const hospitalStep = document.getElementById('hospital-step');
+                const hospitalResult = document.getElementById('hospital-result');
+                const hospitalTime = document.getElementById('hospital-time');
+                
+                if (hospitalStep) {
+                    hospitalStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    hospitalStep.querySelector('.spinner-border').style.display = 'none';
+                }
+                
+                if (hospitalTime) {
+                    hospitalTime.textContent = new Date().toLocaleTimeString();
+                }
+                
+                if (hospitalResult) {
+                    hospitalResult.classList.remove('d-none');
+                    hospitalResult.innerHTML = `
+                        <div class="alert alert-success">
+                            <strong>Kết quả tìm kiếm bệnh viện:</strong><br>
+                            <strong>Bệnh viện đề xuất:</strong> ${data.recommended_hospital}<br>
+                            <strong>Số lượng bệnh viện khả dụng:</strong> ${data.available_hospitals ? data.available_hospitals.length : 0}
+                        </div>
+                    `;
+                    
+                    // Display reasoning if available
+                    if (data.reasoning) {
+                        displayReasoning('hospital-reasoning', data.reasoning);
+                    }
+                }
+                
+                // Auto-proceed to next step
+                setTimeout(() => {
+                    startOptimizer();
+                }, 1000);
+            });
+            
+            function startPatientCareStep() {
+                // Update patient care step to active
+                const patientCareStep = document.getElementById('patient-care-step');
+                if (patientCareStep) {
+                    patientCareStep.querySelector('.timeline-badge').className = 'timeline-badge bg-primary';
+                    patientCareStep.querySelector('.timeline-body span').textContent = 'Đang phân luồng bệnh nhân...';
+                }
+                
+                // Auto-proceed to hospital step after 2 seconds
+                setTimeout(() => {
+                    startHospitalStep();
+                }, 2000);
+            }
+
+            function startHospitalStep() {
+                // Update hospital step to active
+                const hospitalStep = document.getElementById('hospital-step');
+                if (hospitalStep) {
+                    hospitalStep.querySelector('.timeline-badge').className = 'timeline-badge bg-primary';
+                    hospitalStep.querySelector('.timeline-body span').textContent = 'Đang tìm kiếm bệnh viện...';
+                }
+            }
+
+            function startOptimizer() {
+                // Update optimizer step to active
+                const optimizerStep = document.getElementById('optimizer-step');
+                if (optimizerStep) {
+                    optimizerStep.querySelector('.timeline-badge').className = 'timeline-badge bg-primary';
+                    optimizerStep.querySelector('.timeline-body span').textContent = 'Đang tối ưu hóa điều phối...';
+                }
+            }
+
+            function completeProcessing() {
+                // Update final step
+                const finalStep = document.getElementById('final-step');
+                if (finalStep) {
+                    finalStep.querySelector('.timeline-badge').className = 'timeline-badge bg-success';
+                    finalStep.querySelector('.spinner-border').style.display = 'none';
+                    finalStep.querySelector('.timeline-body span').textContent = 'Hoàn thành quá trình điều phối!';
+                }
+            }
+
+            // ...existing code...
+        </script>
+</body>
+</html>

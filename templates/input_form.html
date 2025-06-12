@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ thống Điều phối Bệnh nhân | Nhập liệu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row bg-primary text-white p-3">
+            <div class="col">
+                <h2>Hệ Thống Điều Phối Bệnh Nhân</h2>
+                <p>Nhập thông tin bệnh nhân để bắt đầu quá trình điều phối</p>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title">Thông tin bệnh nhân</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="patientForm" method="post" action="/process">
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="patientId" class="form-label">ID bệnh nhân</label>
+                                    <input type="text" class="form-control" id="patientId" name="patient_id" value="P{{ random_id }}" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="onsetTime" class="form-label">Thời gian khởi phát triệu chứng</label>
+                                    <input type="text" class="form-control" id="onsetTime" name="onset_time" placeholder="VD: 10 phút, 2 giờ, vài ngày..." required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Mô tả tình trạng (bằng tiếng Việt)</label>
+                                <textarea class="form-control" id="description" name="description" rows="5" placeholder="Mô tả chi tiết về tình trạng bệnh nhân..." required></textarea>
+                                <div class="form-text">Vui lòng mô tả chi tiết các triệu chứng, tuổi tác, giới tính và các thông tin liên quan.</div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="vitals" class="form-label">Dấu hiệu sinh tồn (nếu có)</label>
+                                    <input type="text" class="form-control" id="vitals" name="vitals" placeholder="Huyết áp, mạch, nhiệt độ...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="medicalHistory" class="form-label">Tiền sử bệnh lý</label>
+                                    <input type="text" class="form-control" id="medicalHistory" name="medical_history" placeholder="Các bệnh mãn tính, dị ứng...">
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Vị trí hiện tại</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">Vĩ độ</span>
+                                        <input type="number" step="0.0001" class="form-control" name="latitude" value="10.7743" required>
+                                        <span class="input-group-text">Kinh độ</span>
+                                        <input type="number" step="0.0001" class="form-control" name="longitude" value="106.6675" required>
+                                    </div>
+                                    <div class="form-text">Vị trí mặc định: Thành phố Hồ Chí Minh</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Mức độ khẩn cấp</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="emergencyCheck" name="is_emergency">
+                                        <label class="form-check-label" for="emergencyCheck">Đánh dấu là trường hợp khẩn cấp</label>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">Gửi thông tin</button>
+                                    <button type="button" id="loadExampleBtn" class="btn btn-outline-secondary ms-2">Sử dụng ví dụ mẫu</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3 mb-5">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="card-title">Hoặc chạy demo tự động</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Chạy demo với dữ liệu mẫu được chuẩn bị sẵn:</p>
+                        <a href="{{ url_for('run_demo_endpoint') }}" class="btn btn-success" id="runAutoDemo">Chạy Demo Tự động</a>
+                        <a href="{{ url_for('home') }}" class="btn btn-link ms-3">Quay lại trang chủ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript để xử lý form -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Xử lý nút "Sử dụng ví dụ mẫu"
+            document.getElementById('loadExampleBtn').addEventListener('click', function() {
+                // Dữ liệu mẫu
+                const exampleData = {
+                    description: "Nam, 55 tuổi, bất tỉnh trong công viên, da tái, mồ hôi lạnh, không phản ứng.",
+                    vitals: "Huyết áp: Không đo được, Nhịp tim: Không xác định",
+                    onset_time: "10 phút",
+                    medical_history: "Tăng huyết áp, đái tháo đường"
+                };
+                
+                // Điền dữ liệu vào form
+                document.getElementById('description').value = exampleData.description;
+                document.getElementById('vitals').value = exampleData.vitals;
+                document.getElementById('onsetTime').value = exampleData.onset_time;
+                document.getElementById('medicalHistory').value = exampleData.medical_history;
+                document.getElementById('emergencyCheck').checked = true;
+            });
+
+            // Xử lý nút "Chạy Demo Tự động"
+            document.getElementById('runAutoDemo').addEventListener('click', function(e) {
+                e.preventDefault();
+                this.textContent = 'Đang xử lý...';
+                this.classList.add('disabled');
+                
+                fetch(this.href, {
+                    method: 'POST'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/processing';
+                    } else {
+                        alert('Có lỗi xảy ra: ' + (data.error || 'Lỗi không xác định'));
+                        this.textContent = 'Chạy Demo Tự động';
+                        this.classList.remove('disabled');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Có lỗi xảy ra khi kết nối đến server');
+                    this.textContent = 'Chạy Demo Tự động';
+                    this.classList.remove('disabled');
+                });
+            });
+
+            // Thêm validation cho form
+            document.getElementById('patientForm').addEventListener('submit', function(e) {
+                const description = document.getElementById('description').value.trim();
+                if (description.length < 10) {
+                    e.preventDefault();
+                    alert('Vui lòng nhập mô tả chi tiết về tình trạng bệnh nhân (ít nhất 10 ký tự)');
+                }
+            });
+        });
+    </script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

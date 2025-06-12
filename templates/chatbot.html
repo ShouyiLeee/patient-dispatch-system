@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tư vấn trực tuyến | Hệ thống Điều phối Bệnh nhân</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+    <style>
+        .chat-container {
+            height: 500px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+        }
+        .message {
+            margin-bottom: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 1rem;
+            max-width: 75%;
+        }
+        .message-user {
+            background-color: #d1ecf1;
+            border-top-right-radius: 0.25rem;
+            margin-left: auto;
+            text-align: right;
+        }
+        .message-bot {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-top-left-radius: 0.25rem;
+            margin-right: auto;
+        }
+        .bot-typing {
+            border-radius: 1rem;
+            background-color: #e9ecef; 
+            padding: 0.5rem 1rem;
+            max-width: 75%;
+            margin-right: auto;
+            margin-bottom: 1rem;
+        }
+        .message-info {
+            font-size: 0.75rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }        .btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .bot-response-content {
+            line-height: 1.6;
+        }
+        .bot-response-content h5, .bot-response-content h6 {
+            margin-top: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .bot-response-content ul, .bot-response-content ol {
+            margin-bottom: 0.5rem;
+            padding-left: 1.2rem;
+        }
+        .bot-response-content li {
+            margin-bottom: 0.25rem;
+        }
+        .bot-response-content code {
+            font-size: 0.9em;
+        }
+        .bot-response-content .bi {
+            margin-right: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">        <div class="row bg-primary text-white p-3">
+            <div class="col">
+                <h2>Hệ Thống Điều Phối Bệnh Nhân</h2>
+                <p>Tư vấn trực tuyến - Hỗ trợ bệnh nhân không khẩn cấp</p>
+            </div>
+            <div class="col-auto">
+                <div class="mt-2">
+                    <a href="/dashboard" class="btn btn-light me-2">
+                        <i class="bi bi-grid-3x3-gap"></i> Dashboard
+                    </a>
+                    <a href="/" class="btn btn-outline-light">
+                        <i class="bi bi-house"></i> Trang chủ
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <h4><i class="bi bi-info-circle-fill me-2"></i> Tư vấn y tế trực tuyến</h4>
+                    <p>Dựa trên thông tin của bạn, hệ thống xác định đây là trường hợp ưu tiên thấp. Bạn có thể trao đổi trực tiếp với trợ lý ảo để nhận hướng dẫn.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <!-- Thông tin bệnh nhân -->
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title"><i class="bi bi-person-fill me-2"></i> Thông tin của bạn</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th style="width: 150px;">ID:</th>
+                                <td><strong>{{ patient_id }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Mô tả:</th>
+                                <td>{{ description }}</td>
+                            </tr>
+                            {% if medical_history %}
+                            <tr>
+                                <th>Tiền sử:</th>
+                                <td>{{ medical_history }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Mức độ ưu tiên:</th>
+                                <td>
+                                    <span class="badge bg-info">{{ priority }}</span>
+                                </td>
+                            </tr>
+                        </table>
+                        
+                        <div class="alert alert-secondary mt-3">
+                            <p class="mb-1"><i class="bi bi-exclamation-circle me-2"></i> <strong>Lưu ý:</strong></p>
+                            <p class="mb-0">Đây là dịch vụ tư vấn sơ bộ, không thay thế chẩn đoán từ bác sĩ chuyên khoa.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('home') }}" class="btn btn-secondary">
+                        <i class="bi bi-house me-2"></i> Quay về trang chủ
+                    </a>
+                    <button type="button" class="btn btn-warning" id="endChatBtn">
+                        <i class="bi bi-x-circle me-2"></i> Kết thúc tư vấn
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Chatbot -->
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title"><i class="bi bi-chat-dots-fill me-2"></i> Trợ lý Y tế Ảo</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="chat-container" class="chat-container mb-3">
+                            <!-- Chat messages will be added here -->
+                            <div class="message message-bot">
+                                <div class="message-content">Xin chào! Tôi là trợ lý y tế ảo. Tôi đã xem thông tin của bạn và sẵn sàng hỗ trợ. Bạn có thể hỏi tôi về tình trạng sức khỏe, các triệu chứng hoặc lời khuyên y tế.</div>
+                                <div class="message-info">Trợ lý</div>
+                            </div>
+                            <div class="message message-bot">
+                                <div class="message-content">Dựa trên thông tin bạn đã cung cấp, tôi có thể giúp gì cho bạn hôm nay?</div>
+                                <div class="message-info">Trợ lý</div>
+                            </div>
+                        </div>
+                        
+                        <form id="chat-form" class="d-flex">
+                            <input type="text" id="message-input" class="form-control me-2" placeholder="Nhập câu hỏi của bạn..." required>
+                            <button type="submit" class="btn btn-primary btn-circle">
+                                <i class="bi bi-send"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="card-title mb-0">Câu hỏi gợi ý</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm btn-outline-secondary suggestion-btn">Tôi nên dùng thuốc gì?</button>
+                                <button class="btn btn-sm btn-outline-secondary suggestion-btn">Khi nào tôi nên đến bệnh viện?</button>
+                                <button class="btn btn-sm btn-outline-secondary suggestion-btn">Triệu chứng này có nguy hiểm không?</button>
+                                <button class="btn btn-sm btn-outline-secondary suggestion-btn">Cần làm gì để giảm đau?</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Từ hỗ trợ modal -->
+    <div class="modal fade" id="endChatModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">Kết thúc tư vấn</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc muốn kết thúc phiên tư vấn này?</p>
+                    <p>Nếu bạn cần tư vấn thêm, bạn sẽ cần phải bắt đầu một phiên mới.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tiếp tục tư vấn</button>
+                    <a href="{{ url_for('home') }}" class="btn btn-danger">Kết thúc phiên</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.socket.io/4.0.1/socket.io.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatContainer = document.getElementById('chat-container');
+            const chatForm = document.getElementById('chat-form');
+            const messageInput = document.getElementById('message-input');
+            const endChatBtn = document.getElementById('endChatBtn');
+            const suggestionBtns = document.querySelectorAll('.suggestion-btn');
+            
+            // Connect to Socket.IO server
+            const socket = io();
+              // Function to add a message to the chat container
+            function addMessage(message, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.classList.add('message');
+                
+                if (sender === 'user') {
+                    messageDiv.classList.add('message-user');
+                    messageDiv.innerHTML = `
+                        <div class="message-content">${message}</div>
+                        <div class="message-info">Bạn</div>
+                    `;
+                } else {
+                    messageDiv.classList.add('message-bot');
+                    const formattedMessage = formatBotResponse(message);
+                    messageDiv.innerHTML = `
+                        <div class="message-content">${formattedMessage}</div>
+                        <div class="message-info">Trợ lý Y tế</div>
+                    `;
+                }
+                
+                chatContainer.appendChild(messageDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Function to format bot response with better styling
+            function formatBotResponse(message) {
+                // Convert basic markdown-like formatting
+                let formatted = message
+                    // Bold text **text** -> <strong>text</strong>
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    // Italic text *text* -> <em>text</em>
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    // Code `code` -> <code>code</code>
+                    .replace(/`(.*?)`/g, '<code class="bg-light px-1 rounded">$1</code>')
+                    // Line breaks
+                    .replace(/\n/g, '<br>')
+                    // Emoji-like patterns
+                    .replace(/:\)/g, '😊')
+                    .replace(/:\(/g, '😟')
+                    .replace(/:\|/g, '😐')
+                    .replace(/:D/g, '😄');
+                
+                // Format lists (- item or * item)
+                formatted = formatted.replace(/^[-*]\s(.+)$/gm, '<li class="mb-1">$1</li>');
+                if (formatted.includes('<li')) {
+                    formatted = formatted.replace(/(<li.*<\/li>)/s, '<ul class="list-unstyled mt-2">$1</ul>');
+                }
+                
+                // Format numbered lists (1. item)
+                formatted = formatted.replace(/^\d+\.\s(.+)$/gm, '<li class="mb-1">$1</li>');
+                if (formatted.includes('<li') && !formatted.includes('<ul')) {
+                    formatted = formatted.replace(/(<li.*<\/li>)/s, '<ol class="mt-2">$1</ol>');
+                }
+                
+                // Format headers (## Header)
+                formatted = formatted.replace(/^##\s(.+)$/gm, '<h6 class="text-primary mt-2 mb-2">$1</h6>');
+                formatted = formatted.replace(/^#\s(.+)$/gm, '<h5 class="text-primary mt-2 mb-2">$1</h5>');
+                
+                // Add medical icons for common terms
+                formatted = formatted
+                    .replace(/(?:thuốc|medication|medicine)/gi, '<i class="bi bi-capsule text-success"></i> $&')
+                    .replace(/(?:bệnh viện|hospital)/gi, '<i class="bi bi-hospital text-info"></i> $&')
+                    .replace(/(?:bác sĩ|doctor)/gi, '<i class="bi bi-person-badge text-primary"></i> $&')
+                    .replace(/(?:cẩn thận|warning|cảnh báo)/gi, '<i class="bi bi-exclamation-triangle text-warning"></i> $&')
+                    .replace(/(?:khẩn cấp|emergency|cấp cứu)/gi, '<i class="bi bi-lightning text-danger"></i> $&');
+                
+                // Wrap in a container for better styling
+                return `<div class="bot-response-content">${formatted}</div>`;
+            }
+            
+            // Function to show typing indicator
+            function showTypingIndicator() {
+                const typingDiv = document.createElement('div');
+                typingDiv.classList.add('bot-typing');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.innerHTML = `
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow spinner-grow-sm mx-1" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="spinner-grow spinner-grow-sm" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                `;
+                chatContainer.appendChild(typingDiv);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }
+            
+            // Function to remove typing indicator
+            function removeTypingIndicator() {
+                const typingIndicator = document.getElementById('typing-indicator');
+                if (typingIndicator) {
+                    typingIndicator.remove();
+                }
+            }
+            
+            // Handle form submission
+            chatForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const message = messageInput.value.trim();
+                if (message) {
+                    addMessage(message, 'user');
+                    
+                    // Clear input
+                    messageInput.value = '';
+                    
+                    // Show typing indicator
+                    showTypingIndicator();
+                    
+                    // Emit message to server
+                    socket.emit('chatbot_message', {
+                        message: message,
+                        patient_id: '{{ patient_id }}'
+                    });
+                }
+            });
+            
+            // Handle suggestion buttons
+            suggestionBtns.forEach(button => {
+                button.addEventListener('click', function() {
+                    const message = this.textContent;
+                    messageInput.value = message;
+                });
+            });
+            
+            // Handle end chat button
+            endChatBtn.addEventListener('click', function() {
+                const endChatModal = new bootstrap.Modal(document.getElementById('endChatModal'));
+                endChatModal.show();
+            });
+            
+            // Socket.IO event listeners
+            socket.on('connect', function() {
+                console.log('Connected to server');
+            });
+            
+            socket.on('chatbot_response', function(data) {
+                removeTypingIndicator();
+                addMessage(data.response, 'bot');
+            });
+            
+            // Auto-focus the input field
+            messageInput.focus();
+        });
+    </script>
+</body>
+</html>

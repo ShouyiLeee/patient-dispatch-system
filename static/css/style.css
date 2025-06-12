@@ -1,0 +1,268 @@
+/* Main stylesheet for Patient Flow Coordination System */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.card {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.card-header {
+    border-radius: 8px 8px 0 0 !important;
+    font-weight: 600;
+}
+
+/* Flow visualization styling */
+.node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.node:hover {
+    filter: brightness(1.1);
+}
+
+.node-label {
+    font-size: 12px;
+    font-weight: bold;
+    fill: #333;
+    text-anchor: middle;
+}
+
+.link {
+    stroke: #999;
+    stroke-opacity: 0.6;
+}
+
+.arrow {
+    fill: #999;
+}
+
+/* Patient info styling */
+.patient-card {
+    border-left: 5px solid #0d6efd;
+}
+
+.symptom-tag {
+    background-color: #dc3545;
+}
+
+/* Timeline styling for processing page */
+.timeline {
+    position: relative;
+    padding: 20px 0;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: #ddd;
+    left: 30px;
+    margin-left: -2px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-badge {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    position: absolute;
+    left: 30px;
+    margin-left: -20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    z-index: 100;
+    transition: all 0.3s ease;
+}
+
+.timeline-panel {
+    margin-left: 60px;
+    background-color: #fff;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.timeline-panel::before {
+    content: '';
+    position: absolute;
+    top: 19px;
+    left: -15px;
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent #fff transparent transparent;
+}
+
+.timeline-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* Agent Node visualization styling */
+.agent-node {
+    width: 180px;
+    height: 100px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+}
+
+.agent-node:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.triage-agent {
+    border-top: 5px solid #0d6efd;
+}
+
+.hospital-agent {
+    border-top: 5px solid #198754;
+}
+
+.dispatch-agent {
+    border-top: 5px solid #dc3545;
+}
+
+.optimizer-agent {
+    border-top: 5px solid #6610f2;
+}
+
+.result-node {
+    border-top: 5px solid #ffc107;
+}
+
+.node-content {
+    text-align: center;
+}
+
+.input-output {
+    margin-top: 5px;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.arrow-right {
+    position: absolute;
+    right: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background-color: transparent;
+    border-top: 3px solid #ccc;
+    border-right: 3px solid #ccc;
+    transform: translateY(-50%) rotate(45deg);
+}
+
+.arrow-right-bottom {
+    position: absolute;
+    right: -30px;
+    bottom: 0;
+    width: 30px;
+    height: 50px;
+    border-right: 3px solid #ccc;
+    border-bottom: 3px solid #ccc;
+}
+
+.arrow-right-top {
+    position: absolute;
+    right: -30px;
+    top: 0;
+    width: 30px;
+    height: 50px;
+    border-right: 3px solid #ccc;
+    border-top: 3px solid #ccc;
+}
+    color: white;
+    border-radius: 15px;
+    padding: 2px 8px;
+    font-size: 12px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+.triage-priority {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.priority-1 { color: #dc3545; }  /* Red - Critical */
+.priority-2 { color: #fd7e14; }  /* Orange - Urgent */
+.priority-3 { color: #ffc107; }  /* Yellow - High */
+.priority-4 { color: #0dcaf0; }  /* Blue - Medium */
+.priority-5 { color: #20c997; }  /* Green - Low */
+
+/* Hospital and ambulance info */
+.info-label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.info-value {
+    font-weight: normal;
+}
+
+.doctor-name {
+    color: #0d6efd;
+    font-weight: 500;
+}
+
+.eta {
+    font-weight: bold;
+    font-size: 16px;
+    color: #dc3545;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #flow-graph {
+        height: 300px;
+    }
+}
+
+/* Animation for data updates */
+@keyframes highlight {
+    0% { background-color: rgba(13, 110, 253, 0.2); }
+    100% { background-color: transparent; }
+}
+
+.highlight {
+    animation: highlight 1.5s ease-in-out;
+}
+
+/* Tooltip styling */
+.tooltip-custom {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    font-size: 12px;
+    pointer-events: none;
+    z-index: 1000;
+    max-width: 300px;
+}

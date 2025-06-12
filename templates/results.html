@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kết quả điều phối | Hệ thống Điều phối Bệnh nhân</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='images/favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row bg-primary text-white p-3">
+            <div class="col">
+                <h2>Hệ Thống Điều Phối Bệnh Nhân</h2>
+                <p>Kết quả điều phối hoàn tất</p>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="alert alert-success">
+                    <h4><i class="bi bi-check-circle-fill me-2"></i> Điều phối thành công!</h4>
+                    <p>Hệ thống đã hoàn thành việc điều phối xe cứu thương và bệnh viện cho bệnh nhân <strong>{{ flow_data.patient_id }}</strong></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <!-- Thông tin bệnh nhân -->
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="card-title"><i class="bi bi-person-fill me-2"></i> Thông tin bệnh nhân</h5>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th style="width: 150px;">ID bệnh nhân:</th>
+                                <td><strong>{{ flow_data.patient_id }}</strong></td>
+                            </tr>
+                            {% if patient_info.description %}
+                            <tr>
+                                <th>Mô tả:</th>
+                                <td>{{ patient_info.description }}</td>
+                            </tr>
+                            {% endif %}
+                            {% if patient_info.medical_history %}
+                            <tr>
+                                <th>Tiền sử:</th>
+                                <td>{{ patient_info.medical_history }}</td>
+                            </tr>
+                            {% endif %}
+                            <tr>
+                                <th>Trạng thái:</th>
+                                <td>
+                                    <span class="badge {% if triage_info.needs_emergency %}bg-danger{% else %}bg-warning{% endif %}">
+                                        {% if triage_info.needs_emergency %}Khẩn cấp{% else %}Thông thường{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Mức độ ưu tiên:</th>
+                                <td>{{ triage_info.priority }}</td>
+                            </tr>
+                            <tr>
+                                <th>Chuyên khoa:</th>
+                                <td>{{ triage_info.specialty }}</td>
+                            </tr>
+                            {% if patient_info.location %}
+                            <tr>
+                                <th>Vị trí:</th>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#mapModal">
+                                        <i class="bi bi-geo-alt-fill"></i> Xem bản đồ
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Kết quả điều phối -->
+            <div class="col-md-6">                <div class="card mb-3">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title"><i class="bi bi-check2-circle me-2"></i> Kết quả điều phối</h5>
+                    </div>
+                    <div class="card-body">
+                            {% if optimizer_info.route_to == "chatbot" %}
+                            <div class="alert alert-info">
+                                <h4><i class="bi bi-chat-dots-fill me-2"></i> Tư vấn trực tuyến</h4>
+                                <p>Dựa trên phân tích các triệu chứng, trường hợp của bạn không cần cấp cứu và đã được chuyển đến hệ thống tư vấn y tế trực tuyến.</p>
+                                <a href="{{ url_for('chatbot_page') }}?patient_id={{ flow_data.patient_id }}" class="btn btn-primary">
+                                    <i class="bi bi-chat-text me-2"></i> Tiếp tục tư vấn
+                                </a>
+                            </div>
+                            {% elif optimizer_info.route_to == "hospital" %}
+                            <div class="alert alert-warning">
+                                <h4><i class="bi bi-hospital-fill me-2"></i> Cần thăm khám tại bệnh viện</h4>
+                                <p>Dựa trên phân tích các triệu chứng, trường hợp của bạn cần đến bệnh viện để được khám và điều trị.</p>
+                            </div>
+                            
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="p-3 bg-light rounded-circle me-3">
+                                    <i class="bi bi-building-fill text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Bệnh viện được đề xuất</h5>
+                                    <p class="display-6 mb-0">{{ flow_data.hospital }}</p>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="p-3 bg-light rounded-circle me-3">
+                                    <i class="bi bi-clock-fill text-primary" style="font-size: 2rem;"></i>
+                                </div>
+                                <div>
+                                    <h5 class="mb-0">Thời gian dự kiến</h5>
+                                    <p class="display-6 mb-0">{{ flow_data.eta }} <small class="text-muted">({{ optimizer_info.eta_minutes }} phút)</small></p>
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if triage_info.priority <= 2 and not triage_info.needs_emergency %}
+                            <div class="alert alert-info mt-3">
+                                <h5><i class="bi bi-chat-dots-fill me-2"></i> Tư vấn trực tuyến có sẵn</h5>
+                                <p>Tình trạng của bạn được đánh giá là ưu tiên thấp. Bạn có thể sử dụng dịch vụ tư vấn trực tuyến để nhận thêm thông tin và hướng dẫn.</p>
+                                <a href="{{ url_for('chatbot_page') }}" class="btn btn-outline-primary mt-2">
+                                    <i class="bi bi-chat-text me-2"></i> Bắt đầu tư vấn
+                                </a>
+                            </div>
+                            {% endif %}
+                        
+                        <hr>
+                        
+                        <h5 class="text-primary"><i class="bi bi-hospital-fill me-2"></i> Bệnh viện được chọn</h5>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ flow_data.hospital }}</h5>
+                                {% if optimizer_info.optimized_hospital %}
+                                <p class="card-text">
+                                    <i class="bi bi-geo-alt-fill text-danger"></i> Cách {{ optimizer_info.optimized_hospital.distance_km }} km từ vị trí bệnh nhân<br>
+                                    {% if optimizer_info.optimized_hospital.specialty_match %}
+                                    <i class="bi bi-check-circle-fill text-success"></i> Phù hợp với chuyên khoa {{ triage_info.specialty }}
+                                    {% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <h5 class="text-danger"><i class="bi bi-truck me-2"></i> Xe cứu thương được điều động</h5>
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ flow_data.ambulance }}</h5>
+                                {% if optimizer_info.optimized_ambulance %}
+                                <p class="card-text">
+                                    <i class="bi bi-clock-fill text-primary"></i> Ước tính đến nơi trong {{ optimizer_info.optimized_ambulance.eta_minutes }} phút
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Flow Visualization -->
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title"><i class="bi bi-diagram-3-fill me-2"></i> Luồng xử lý đa Agent</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="flow-graph" style="width:100%; height:400px; background-color:#f8f9fa; border-radius:5px;">
+                            <div class="text-center">
+                                <div class="d-flex flex-row justify-content-center align-items-center">
+                                    <!-- Triage Agent -->
+                                    <div class="agent-node triage-agent mx-3">
+                                        <div class="node-content">
+                                            <h6>Triage Agent</h6>
+                                            <div class="input-output">
+                                                <span class="small">Phân tích thông tin bệnh nhân</span>
+                                            </div>
+                                        </div>
+                                        <div class="arrow-right"></div>
+                                    </div>
+                                    
+                                    <!-- Hospital & Dispatch Agents -->
+                                    <div class="parallel-nodes mx-3">
+                                        <div class="agent-node hospital-agent mb-3">
+                                            <div class="node-content">
+                                                <h6>Hospital Agent</h6>
+                                                <div class="input-output">
+                                                    <span class="small">Tìm bệnh viện phù hợp</span>
+                                                </div>
+                                            </div>
+                                            <div class="arrow-right-bottom"></div>
+                                        </div>
+                                        <div class="agent-node dispatch-agent mt-3">
+                                            <div class="node-content">
+                                                <h6>Dispatch Agent</h6>
+                                                <div class="input-output">
+                                                    <span class="small">Tìm xe cứu thương</span>
+                                                </div>
+                                            </div>
+                                            <div class="arrow-right-top"></div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Optimizer Agent -->
+                                    <div class="agent-node optimizer-agent mx-3">
+                                        <div class="node-content">
+                                            <h6>Optimizer Agent</h6>
+                                            <div class="input-output">
+                                                <span class="small">Tối ưu kết quả</span>
+                                            </div>
+                                        </div>
+                                        <div class="arrow-right"></div>
+                                    </div>
+                                    
+                                    <!-- Final Result -->
+                                    <div class="agent-node result-node mx-3">
+                                        <div class="node-content">
+                                            <h6>Kết quả</h6>
+                                            <div class="input-output">
+                                                <span class="small">Điều phối hoàn tất</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center mt-4">
+                                <a href="{{ url_for('report', flow_id=flow_data.id) }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="bi bi-graph-up"></i> Xem báo cáo chi tiết
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3 mb-5">
+            <div class="col text-center">
+                <a href="{{ url_for('input_form') }}" class="btn btn-primary me-2">
+                    <i class="bi bi-plus-circle-fill"></i> Nhập thông tin bệnh nhân mới
+                </a>
+                <a href="{{ url_for('home') }}" class="btn btn-outline-secondary">
+                    <i class="bi bi-house-fill"></i> Quay lại trang chủ
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Map Modal -->
+    <div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Vị trí bệnh nhân</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="map" style="height: 400px; width: 100%;"></div>
+                    <div class="mt-3">
+                        <strong>Tọa độ:</strong> 
+                        Vĩ độ: {{ patient_info.location.latitude }}, 
+                        Kinh độ: {{ patient_info.location.longitude }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    {% if patient_info.location %}
+    <script>
+        // Add map script when modal opens
+        document.getElementById('mapModal').addEventListener('shown.bs.modal', function () {
+            if (!document.getElementById('map-script')) {
+                const script = document.createElement('script');
+                script.id = 'map-script';
+                script.src = `https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap`;
+                script.defer = true;
+                script.async = true;
+                document.head.appendChild(script);
+            } else {
+                initMap();
+            }
+        });
+
+        // Initialize map
+        function initMap() {
+            const lat = {{ patient_info.location.latitude }};
+            const lng = {{ patient_info.location.longitude }};
+            const mapDiv = document.getElementById('map');
+            
+            const map = new google.maps.Map(mapDiv, {
+                center: { lat, lng },
+                zoom: 14
+            });
+            
+            new google.maps.Marker({
+                position: { lat, lng },
+                map,
+                title: 'Vị trí bệnh nhân'
+            });
+        }
+    </script>
+    {% endif %}
+</body>
+</html>

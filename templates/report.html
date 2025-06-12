@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo cáo Flow - {{ report.flow_id[:16] }}...</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.0/font/bootstrap-icons.css">
+    <style>
+        .report-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+        }
+        .section-card {
+            border-left: 4px solid #007bff;
+            margin-bottom: 1.5rem;
+        }
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        @media print {
+            .print-btn, .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Print Button -->
+    <button class="btn btn-primary print-btn no-print" onclick="window.print()">
+        <i class="bi bi-printer"></i> In báo cáo
+    </button>
+
+    <!-- Header -->
+    <div class="report-header">
+        <div class="container">
+            <h1><i class="bi bi-file-text"></i> Báo cáo Flow Điều phối Bệnh nhân</h1>
+            <p class="lead">Flow ID: {{ report.flow_id }}</p>
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Thời gian:</strong> {{ report.timestamp }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Trạng thái:</strong> 
+                        <span class="badge {% if report.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                            {{ report.status }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-4">
+        <!-- Patient Information -->
+        <div class="card section-card">
+            <div class="card-header bg-info text-white">
+                <h4><i class="bi bi-person-fill"></i> Thông tin bệnh nhân</h4>
+            </div>
+            <div class="card-body">
+                {% if report.patient_data %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Mã bệnh nhân:</strong> {{ report.patient_data.get('patient_id', 'N/A') }}</p>
+                            <p><strong>Trạng thái khẩn cấp:</strong> 
+                                <span class="badge {% if report.patient_data.get('is_emergency') %}bg-danger{% else %}bg-success{% endif %}">
+                                    {% if report.patient_data.get('is_emergency') %}Khẩn cấp{% else %}Thông thường{% endif %}
+                                </span>
+                            </p>
+                            {% if report.patient_data.get('onset_time') %}
+                            <p><strong>Thời gian xuất hiện:</strong> {{ report.patient_data.get('onset_time') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            {% if report.patient_data.get('location') %}
+                            <p><strong>Vị trí:</strong> 
+                                {{ "%.4f"|format(report.patient_data['location'].get('latitude', 0)) }}, 
+                                {{ "%.4f"|format(report.patient_data['location'].get('longitude', 0)) }}
+                            </p>
+                            {% endif %}
+                            {% if report.patient_data.get('image_data') %}
+                            <p><strong>Hình ảnh y tế:</strong> <span class="badge bg-info">Có</span></p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6>Mô tả triệu chứng:</h6>
+                            <p class="text-muted">{{ report.patient_data.get('description', 'Không có mô tả') }}</p>
+                        </div>
+                    </div>
+                    {% if report.patient_data.get('vitals') %}
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <h6>Chỉ số sinh tồn:</h6>
+                            <p class="text-muted">{{ report.patient_data.get('vitals') }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% if report.patient_data.get('medical_history') %}
+                    <div class="row mt-2">
+                        <div class="col-12">
+                            <h6>Tiền sử bệnh lý:</h6>
+                            <p class="text-muted">{{ report.patient_data.get('medical_history') }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Không có thông tin bệnh nhân</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Triage Results -->
+        <div class="card section-card">
+            <div class="card-header bg-danger text-white">
+                <h4><i class="bi bi-clipboard-pulse"></i> Kết quả phân loại (Triage)</h4>
+            </div>
+            <div class="card-body">
+                {% if report.triage_result %}
+                    <div class="row">
+                        <div class="col-md-4">
+                            <p><strong>Mức độ ưu tiên:</strong> 
+                                <span class="badge {% if report.triage_result.get('priority', 0) >= 4 %}bg-danger{% elif report.triage_result.get('priority', 0) >= 3 %}bg-warning{% else %}bg-success{% endif %}">
+                                    {{ report.triage_result.get('priority', 'N/A') }}/5
+                                </span>
+                            </p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Chuyên khoa:</strong> {{ report.triage_result.get('specialty', 'Chưa xác định') }}</p>
+                        </div>
+                        <div class="col-md-4">
+                            <p><strong>Cần cấp cứu:</strong> 
+                                <span class="badge {% if report.triage_result.get('needs_emergency') %}bg-danger{% else %}bg-success{% endif %}">
+                                    {% if report.triage_result.get('needs_emergency') %}Có{% else %}Không{% endif %}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    {% if report.triage_result.get('symptoms') %}
+                    <h6 class="mt-3">Triệu chứng:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tên triệu chứng</th>
+                                    <th>Vị trí</th>
+                                    <th>Mức độ</th>
+                                    <th>Thời gian</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for symptom in report.triage_result['symptoms'] %}
+                                <tr>
+                                    <td>{{ symptom.get('name', 'N/A') }}</td>
+                                    <td>{{ symptom.get('location', 'N/A') }}</td>
+                                    <td>
+                                        <span class="badge {% if symptom.get('level') == 'Dữ dội' %}bg-danger{% elif symptom.get('level') == 'Trung bình' %}bg-warning{% else %}bg-info{% endif %}">
+                                            {{ symptom.get('level', 'N/A') }}
+                                        </span>
+                                    </td>
+                                    <td>{{ symptom.get('duration', 'N/A') }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                    
+                    {% if report.triage_result.get('vital_signs') %}
+                    <h6 class="mt-3">Chỉ số sinh tồn:</h6>
+                    <div class="row">
+                        {% set vitals = report.triage_result['vital_signs'] %}
+                        <div class="col-md-3">
+                            <p><strong>Huyết áp:</strong> {{ vitals.get('blood_pressure', 'N/A') }}</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Nhịp tim:</strong> {{ vitals.get('heart_rate', 'N/A') }} bpm</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>SPO2:</strong> {{ vitals.get('spo2', 'N/A') }}%</p>
+                        </div>
+                        <div class="col-md-3">
+                            <p><strong>Nhiệt độ:</strong> {{ vitals.get('temperature', 'N/A') }}°C</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Không có kết quả phân loại</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Hospital Results -->
+        <div class="card section-card">
+            <div class="card-header bg-success text-white">
+                <h4><i class="bi bi-hospital"></i> Kết quả điều phối bệnh viện</h4>
+            </div>
+            <div class="card-body">
+                {% if report.hospital_result %}
+                    <p><strong>Bệnh viện được chọn:</strong> {{ report.hospital_result.get('recommended_hospital', 'Chưa xác định') }}</p>
+                    
+                    {% if report.hospital_result.get('available_hospitals') %}
+                    <h6 class="mt-3">Danh sách bệnh viện khả dụng:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Tên bệnh viện</th>
+                                    <th>Khoảng cách</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for hospital in report.hospital_result['available_hospitals'] %}
+                                <tr>
+                                    <td>{{ hospital.get('name', 'N/A') }}</td>
+                                    <td>{{ hospital.get('distance', 'N/A') }}</td>
+                                    <td>
+                                        <span class="badge {% if hospital.get('capacity') == 'Available' %}bg-success{% else %}bg-warning{% endif %}">
+                                            {{ hospital.get('capacity', 'N/A') }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Không có kết quả điều phối bệnh viện</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Optimizer Results -->
+        <div class="card section-card">
+            <div class="card-header bg-warning text-white">
+                <h4><i class="bi bi-gear"></i> Kết quả tối ưu hóa</h4>
+            </div>
+            <div class="card-body">
+                {% if report.optimizer_result %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Bệnh viện cuối cùng:</strong> {{ report.optimizer_result.get('selected_hospital', 'Chưa xác định') }}</p>
+                            <p><strong>Thời gian dự kiến:</strong> {{ report.optimizer_result.get('estimated_time', 'Chưa tính') }}</p>
+                            {% if report.optimizer_result.get('ambulance_assigned') %}
+                            <p><strong>Xe cấp cứu:</strong> {{ report.optimizer_result.get('ambulance_assigned') }}</p>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Tuyến đường:</strong> {{ report.optimizer_result.get('route_optimization', 'Chưa tối ưu') }}</p>
+                            {% if report.optimizer_result.get('total_cost') %}
+                            <p><strong>Chi phí ước tính:</strong> {{ report.optimizer_result.get('total_cost') }}</p>
+                            {% endif %}
+                            <p><strong>Loại vận chuyển:</strong> {{ report.optimizer_result.get('transport_type', 'N/A') }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if report.optimizer_result.get('available_ambulances') %}
+                    <h6 class="mt-3">Xe cấp cứu khả dụng:</h6>
+                    <p>{{ ', '.join(report.optimizer_result['available_ambulances']) }}</p>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted">Không có kết quả tối ưu hóa</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="card section-card">
+            <div class="card-header bg-primary text-white">
+                <h4><i class="bi bi-clipboard-data"></i> Tổng kết</h4>
+            </div>
+            <div class="card-body">
+                <p><strong>Thời gian thực hiện:</strong> {{ report.execution_time }}</p>
+                <p><strong>Trạng thái flow:</strong> 
+                    <span class="badge {% if report.status == 'completed' %}bg-success{% else %}bg-warning{% endif %}">
+                        {{ report.status|title }}
+                    </span>
+                </p>
+                <p><strong>Kết luận:</strong> Flow đã được thực hiện thành công với đầy đủ các bước phân loại, điều phối bệnh viện và tối ưu hóa.</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="text-center mt-4 mb-5 no-print">
+            <a href="/dashboard" class="btn btn-primary me-2">
+                <i class="bi bi-arrow-left"></i> Quay lại Dashboard
+            </a>
+            <button class="btn btn-secondary" onclick="window.print()">
+                <i class="bi bi-printer"></i> In báo cáo
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

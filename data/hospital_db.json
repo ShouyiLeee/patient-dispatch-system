@@ -1,0 +1,101 @@
+{
+    "hospitals": [
+        {
+            "id": "H001",
+            "name": "Bệnh viện Chợ Rẫy",
+            "address": "201B Nguyễn Chí Thanh, Q.5, TP.HCM",
+            "location": {"latitude": 10.762622, "longitude": 106.660172},
+            "specialties": ["Cấp cứu", "Tim mạch", "ICU", "Nội tổng quát"],
+            "available_doctors": {
+                "Cấp cứu": [
+                    {"id": "DR001", "name": "BS. Nguyễn Văn A", "status": "available"},
+                    {"id": "DR002", "name": "BS. Trần Thị B", "status": "busy"}
+                ],
+                "Tim mạch": [
+                    {"id": "DR003", "name": "BS. Lê Văn C", "status": "available"},
+                    {"id": "DR004", "name": "BS. Phạm Thị D", "status": "available"}
+                ],
+                "ICU": [
+                    {"id": "DR005", "name": "BS. Huỳnh Văn E", "status": "busy"},
+                    {"id": "DR006", "name": "BS. Ngô Thị F", "status": "available"}
+                ],
+                "Nội tổng quát": [
+                    {"id": "DR007", "name": "BS. Đặng Văn G", "status": "available"},
+                    {"id": "DR008", "name": "BS. Vũ Thị H", "status": "busy"}
+                ]
+            },
+            "capacity": {
+                "total_beds": 1000,
+                "available_beds": 50,
+                "icu_beds": 100,
+                "available_icu": 10
+            },
+            "status": "available",
+            "emergency": true,
+            "rating": 4.5,
+            "wait_time_minutes": 25
+        },
+        {
+            "id": "H002",
+            "name": "Bệnh viện Nhi Đồng 1",
+            "address": "341 Sư Vạn Hạnh, Q.10, TP.HCM",
+            "location": {"latitude": 10.772, "longitude": 106.667},
+            "specialties": ["Nhi khoa", "Cấp cứu", "ICU"],
+            "available_doctors": {
+                "Nhi khoa": [
+                    {"id": "DR009", "name": "BS. Trương Văn I", "status": "available"},
+                    {"id": "DR010", "name": "BS. Mai Thị J", "status": "busy"}
+                ],
+                "Cấp cứu": [
+                    {"id": "DR011", "name": "BS. Lý Văn K", "status": "available"},
+                    {"id": "DR012", "name": "BS. Hồ Thị L", "status": "busy"}
+                ],
+                "ICU": [
+                    {"id": "DR013", "name": "BS. Đinh Văn M", "status": "available"},
+                    {"id": "DR014", "name": "BS. Bùi Thị N", "status": "available"}
+                ]
+            },
+            "capacity": {
+                "total_beds": 800,
+                "available_beds": 30,
+                "icu_beds": 80,
+                "available_icu": 8
+            },
+            "status": "available",
+            "emergency": true,
+            "rating": 4.8,
+            "wait_time_minutes": 40
+        },
+        {
+            "id": "H003",
+            "name": "Bệnh viện Nhân Dân Gia Định",
+            "address": "1 Nơ Trang Long, Q.Bình Thạnh, TP.HCM",
+            "location": {"latitude": 10.803, "longitude": 106.693},
+            "specialties": ["Ngoại tổng hợp", "Nội tổng quát", "ICU"],
+            "available_doctors": {
+                "Ngoại tổng hợp": [
+                    {"id": "DR015", "name": "BS. Dương Văn O", "status": "available"},
+                    {"id": "DR016", "name": "BS. Cao Thị P", "status": "busy"}
+                ],
+                "Nội tổng quát": [
+                    {"id": "DR017", "name": "BS. Châu Văn Q", "status": "busy"},
+                    {"id": "DR018", "name": "BS. Lâm Thị R", "status": "available"}
+                ],
+                "ICU": [
+                    {"id": "DR019", "name": "BS. Hà Văn S", "status": "available"},
+                    {"id": "DR020", "name": "BS. Võ Thị T", "status": "busy"}
+                ]
+            },
+            "capacity": {
+                "total_beds": 900,
+                "available_beds": 40,
+                "icu_beds": 90,
+                "available_icu": 9
+            },
+            "status": "available",
+            "emergency": true,
+            "rating": 4.7,
+            "wait_time_minutes": 30
+        }
+    ]
+}

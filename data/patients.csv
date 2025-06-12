@@ -1,0 +1,6 @@
+ID,Description,Symptoms,Location,Vitals,Medical History,Symptoms Onset Time,Priority Label,Medical Keywords,Special Situation
+T001,"Nam, 55 tuổi, bất tỉnh trong công viên, da tái, mồ hôi lạnh, không phản ứng.","Bất tỉnh, da tái, mồ hôi lạnh","10.754,106.6631","Huyết áp: Không đo được, Nhịp tim: Không xác định","Tăng huyết áp, đái tháo đường","10 phút","Khẩn cấp cao","ICU, Tim mạch","Đột quỵ/Ngừng tim"
+T002,"Bé trai 4 tuổi sốt cao, co giật trong nhà trẻ, cơn co giật 2 phút.","Sốt cao, co giật","10.754,106.6631","Huyết áp: 100/60, Nhịp tim: 120 bpm","Không rõ","15 phút","Khẩn cấp trung bình","Nhi khoa","Unknown"
+T003,"Công nhân té từ giàn giáo 5m, chảy máu đầu và tay, mất ý thức tạm thời.","Té từ độ cao, chảy máu, đau đầu","10.754,106.6631","Huyết áp: 90/60, Nhịp tim: 110 bpm","Không có","20 phút","Khẩn cấp cao","Cấp cứu, Ngoại tổng hợp","Tai nạn lao động"
+T004,"Một phụ nữ 30 tuổi đau bụng dữ dội vùng dưới, buồn nôn, đang mang thai tuần 28.","Đau bụng, buồn nôn, thai kỳ","10.754,106.6631","Huyết áp: 130/85, Nhịp tim: 95 bpm","Thai kỳ tuần 28","1 giờ","Khẩn cấp trung bình","Sản khoa, ICU sản","Thai sản"
+T005,"Một thanh niên đau ngực dữ dội sau khi chơi thể thao, khó thở, mồ hôi nhiều.","Đau ngực, khó thở, mồ hôi","10.754,106.6631","Huyết áp: 140/90, Nhịp tim: 150 bpm","Không rõ","5 phút","Khẩn cấp cao","Tim mạch","Nguy cơ nhồi máu cơ tim"
