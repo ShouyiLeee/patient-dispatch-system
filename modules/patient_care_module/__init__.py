@@ -7,6 +7,7 @@ Handles patient care coordination, ambulance dispatching, hospital coordination,
 from .qa_chatbot import QAChatbot
 from .hospital_agent import HospitalAgent
 from .dispatch_agent import DispatchAgent
+from .ambulance_dispatcher import AmbulanceDispatcher
 
 # Optional imports if available 
 try:

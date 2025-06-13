@@ -12,7 +12,7 @@ from datetime import datetime
 import uuid
 
 # Import our working clean workflow
-from test_clean_workflow import SimplePatientDispatchWorkflow
+from workflow_clean_final import PatientDispatchWorkflow as SimplePatientDispatchWorkflow
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
